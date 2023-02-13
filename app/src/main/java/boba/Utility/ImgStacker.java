@@ -5,11 +5,12 @@ import java.awt.Graphics;
 import java.awt.Point;
 import java.awt.image.BufferedImage;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class ImgStacker {
     private final BufferedImage stackedImage;
-    private final HashMap<String, Image> layers = new HashMap<>();
+    private final LinkedHashMap<String, Image> layers = new LinkedHashMap<>();
     private final HashMap<String, Point> transforms = new HashMap<>();
 
     /**

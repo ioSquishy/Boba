@@ -18,14 +18,14 @@ public class BobaGod {
     public static enum Topping {
         PEARL, LYCHEE, JELLY, MANGO
     }
-    private static HashMap<CupStyle, Image> cupImage = new HashMap<>(CupStyle.values().length, 0);
-    private static HashMap<Tea, Color> teaColor = new HashMap<>(Tea.values().length, 0);
-    private static HashMap<Topping, Image> toppingImage = new HashMap<>(Topping.values().length, 0);
-    private static final Image teaImage = new ImageIcon().getImage();
+    private static HashMap<CupStyle, Image> cupImage = new HashMap<>(CupStyle.values().length);
+    private static HashMap<Tea, Color> teaColor = new HashMap<>(Tea.values().length);
+    private static HashMap<Topping, Image> toppingImage = new HashMap<>(Topping.values().length);
+    private static final Image teaImage = getImage("app\\src\\main\\resources\\TEA.png");
     public static void initBobaMaps() {
         /* Cup Styles */
         //SEALED_CUP:
-
+        cupImage.put(CupStyle.SEALED_CUP, getImage("app\\src\\main\\resources\\CupStyles\\SEALED_CUP.png"));
         //CAPPED_CUP:
 
         //JAR:
@@ -33,15 +33,15 @@ public class BobaGod {
 
         /* Tea */
         //MILK_TEA:
-
+        teaColor.put(Tea.MILK_TEA, new Color(255, 209, 163));
         //GREEN_TEA:
-
+        teaColor.put(Tea.GREEN_TEA, new Color(205, 225, 156));
         //BLACK_TEA:
 
 
         /* Toppings */
         //PEARL:
-
+        toppingImage.put(Topping.PEARL, getImage("app\\src\\main\\resources\\Toppings\\PEARL.png"));
         //LYCHEE:
 
         //JELLY:
@@ -81,7 +81,7 @@ public class BobaGod {
 
     //Return methods
     //drink -> toppings -> cup
-    public Image getBoba() {
+    public BufferedImage getBoba() {
         if (this.cup!=null) {
             if (this.tea != null) {
                 this.boba.setLayer("drink", recolorImage(teaImage, teaColor.get(tea)));
@@ -130,7 +130,16 @@ public class BobaGod {
                 }
             }
         }
-
         return bimage;
+    }
+
+    /**
+     * Gets an image from the specified filepath.
+     * 
+     * @param filePath Image file path.
+     * @return Image
+     */
+    private static Image getImage(String filePath) {
+        return new ImageIcon(filePath).getImage();
     }
 }

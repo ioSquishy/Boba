@@ -8,8 +8,8 @@ public class SettingCompiler {
     public static enum Setting {
         WOOD
     }
-    private static HashMap<Setting, Image> settingImage = new HashMap<>(Setting.values().length, 0);
-    private static HashMap<Setting, Point[]> bobaCoords = new HashMap<>(Setting.values().length, 0);
+    private static HashMap<Setting, Image> settingImage = new HashMap<>(Setting.values().length);
+    private static HashMap<Setting, Point[]> bobaCoords = new HashMap<>(Setting.values().length);
     public static void initSettingMaps() {
         //WOOD:
     }
