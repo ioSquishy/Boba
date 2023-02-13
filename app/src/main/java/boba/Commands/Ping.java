@@ -1,13 +1,16 @@
 package boba.Commands;
 
-import de.btobastian.sdcf4j.Command;
-import de.btobastian.sdcf4j.CommandExecutor;
-import org.javacord.api.entity.message.Message;
+import org.javacord.api.interaction.SlashCommandBuilder;
+import org.javacord.api.interaction.SlashCommandInteraction;
 
-public class Ping implements CommandExecutor {
+public class Ping {
+    public static SlashCommandBuilder createCommand () {
+        return new SlashCommandBuilder()
+            .setName("ping")
+            .setDescription("Pong!");
+    }
 
-    @Command(aliases = "ping", description = "Pong!")
-    public String handleCommand (Message message) {
-        return ("Pong! `" + message.getApi().getLatestGatewayLatency().toMillis() + "ms`");
+    public static void handleCommand (SlashCommandInteraction interaction) {
+        interaction.createImmediateResponder().setContent("Pong! `" + interaction.getApi().getLatestGatewayLatency().toMillis() + "ms`").respond();
     }
 }

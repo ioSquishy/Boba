@@ -25,8 +25,6 @@ dependencies {
     implementation("com.google.guava:guava:30.1.1-jre")
 
     implementation("org.javacord:javacord:3.5.0")
-    implementation("de.btobastian.sdcf4j:sdcf4j-javacord:v1.0.10")
-    implementation("de.btobastian.sdcf4j:sdcf4j-core:v1.0.10")
 
     implementation("io.github.cdimascio:dotenv-java:2.2.4")
 }
