@@ -19,9 +19,9 @@ public class BobaGod {
         PEARL, LYCHEE, JELLY, MANGO
     }
     private static HashMap<CupStyle, Image> cupImage = new HashMap<>(CupStyle.values().length);
+    private static HashMap<CupStyle, Image> teaImage = new HashMap<>(CupStyle.values().length);
     private static HashMap<Tea, Color> teaColor = new HashMap<>(Tea.values().length);
     private static HashMap<Topping, Image> toppingImage = new HashMap<>(Topping.values().length);
-    private static final Image teaImage = getImage("app\\src\\main\\resources\\TEA.png");
     public static void initBobaMaps() {
         /* Cup Styles */
         //SEALED_CUP:
@@ -31,7 +31,14 @@ public class BobaGod {
         //JAR:
 
 
-        /* Tea */
+        /* Tea Image */
+        //SEALED_CUP
+        teaImage.put(CupStyle.SEALED_CUP, getImage("app\\src\\main\\resources\\TeaShapes\\SEALED_CUP_TEA.png"));
+        //CAPPED_CUP
+
+        //JAR
+
+        /* Tea Color */
         //MILK_TEA:
         teaColor.put(Tea.MILK_TEA, new Color(255, 209, 163));
         //GREEN_TEA:
@@ -84,7 +91,7 @@ public class BobaGod {
     public BufferedImage getBoba() {
         if (this.cup!=null) {
             if (this.tea != null) {
-                this.boba.setLayer("drink", recolorImage(teaImage, teaColor.get(tea)));
+                this.boba.setLayer("drink", recolorImage(teaImage.get(cup), teaColor.get(tea)));
                 if (!toppings.isEmpty()) {
                     for (Topping topping : toppings) {
                         this.boba.setLayer(topping.toString(), toppingImage.get(topping));

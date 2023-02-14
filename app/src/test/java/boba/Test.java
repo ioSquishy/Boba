@@ -16,8 +16,6 @@ class Test {
 
         BobaGod boba = new BobaGod();
         boba.setCupStyle(CupStyle.SEALED_CUP);
-        
-        boba.setTea(Tea.GREEN_TEA);
         boba.setTea(Tea.MILK_TEA);
         boba.addTopping(Topping.PEARL);
 
