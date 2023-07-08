@@ -21,7 +21,7 @@ public class BobaGod {
     private static HashMap<CupStyle, Image> cupImage = new HashMap<>(CupStyle.values().length);
     private static HashMap<CupStyle, Image> teaImage = new HashMap<>(CupStyle.values().length);
     private static HashMap<Tea, Color> teaColor = new HashMap<>(Tea.values().length);
-	private static Hashmap<CupStyle, HashMap<Topping, Image>> toppingStyle = new HashMap<>(CupStyle.values().length);
+	private static HashMap<CupStyle, HashMap<Topping, Image>> toppingStyle = new HashMap<>(CupStyle.values().length);
     private static HashMap<Topping, Image> sealed_cup_toppingImage = new HashMap<>(Topping.values().length);
     public static void initBobaMaps() {
         /* Cup Styles */
@@ -99,7 +99,7 @@ public class BobaGod {
                 this.boba.setLayer("drink", recolorImage(teaImage.get(cup), teaColor.get(tea)));
                 if (!toppings.isEmpty()) {
                     for (Topping topping : toppings) {
-                        this.boba.setLayer(topping.toString(), toppingImage.get(topping));
+                        this.boba.setLayer(topping.toString(), sealed_cup_toppingImage.get(topping));
                     }
                 }
             }
