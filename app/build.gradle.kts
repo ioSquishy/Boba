@@ -27,6 +27,8 @@ dependencies {
     implementation("org.javacord:javacord:3.5.0")
 
     implementation("io.github.cdimascio:dotenv-java:2.2.4")
+
+    implementation("org.mongodb:mongodb-driver-sync:4.10.1")
 }
 
 application {
