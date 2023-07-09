@@ -56,10 +56,11 @@ public class Data implements Serializable {
         return doc = (doc != null) ? doc : addUser(userID);
     }
     private static Document findUser(Long userID) {
-        //check existing cache first then new cache
+        //check existing cache first then new cache then database
         Document doc = null;
         doc = existingCachedUsers.getOrDefault(userID, null);
-        return doc = (doc != null) ? doc : newUsers.getOrDefault(userID, null);
+        doc = (doc != null) ? doc : newUsers.getOrDefault(userID, null);
+        return null;
     }
     private static Document addUser(Long userID) {
         return null;
