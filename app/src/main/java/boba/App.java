@@ -15,8 +15,7 @@ public class App {
     public static void main(String[] args) {
 
         Data.initMongoDB();
-        Data.updateAllUsers();
-        //Data.test();
+        Data.test();
         
         /*BobaGod.initBobaMaps();
         SettingCompiler.initSettingMaps();

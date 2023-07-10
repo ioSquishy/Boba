@@ -4,18 +4,20 @@ import io.github.cdimascio.dotenv.Dotenv;
 
 import java.io.Serializable;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.TreeMap;
 
 import static com.mongodb.client.model.Filters.eq;
 import org.bson.Document;
-import org.bson.conversions.Bson;
 
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.model.BulkWriteOptions;
+import com.mongodb.client.model.ReplaceOneModel;
 import com.mongodb.client.model.ReplaceOptions;
 
 
@@ -26,10 +28,7 @@ public class Data implements Serializable {
     private static transient MongoCollection<Document> mongoUsers;
     private static transient boolean mongoOK;
 
-    private static transient TreeMap<Long, Document> newUsersCache = new TreeMap<Long, Document>();
-    private static transient TreeMap<Long, Document> existingUsersCache = new TreeMap<Long, Document>();
-
-    private static TreeMap<Long, Document> failover = new TreeMap<Long, Document>();
+    private static HashMap<Long, Document> userCache = new HashMap<Long, Document>();
 
     public static void initMongoDB() {
         try {
@@ -48,38 +47,40 @@ public class Data implements Serializable {
         System.out.println("Mongo is NOT OK!!");
         mongoOK = false;
     }
-
-    public static void updateAllUsers() {
-
-    }
-
+    
     public static void test() {
-        System.out.println(getUserDoc(263049275196309506L).get("_id").toString());
-        System.out.println("newUsersCache: " + newUsersCache.keySet().toString());
-        System.out.println("existingCache: " + existingUsersCache.keySet().toString());
+        System.out.println(getUserDoc(263049275196309506L).get("coins").toString());
+        System.out.println("cache: " + userCache.keySet().toString());
 
-        syncCacheToDatabase();
-        System.out.println("newUsersCache: " + newUsersCache.keySet().toString());
-        System.out.println("existingCache: " + existingUsersCache.keySet().toString());
+        testIterate(getUserDoc(263049275196309506L));
 
-        System.out.println(getUserDoc(263049275196309506L).get("_id").toString());
-        System.out.println("newUsersCache: " + newUsersCache.keySet().toString());
-        System.out.println("existingCache: " + existingUsersCache.keySet().toString());
+        //syncCacheToDatabase();
+    }
+    public static void testUpdate(Document doc) {
+        doc.put("coins", 3);
+    }
+    public static void testIterate(Document doc) {
+        Document menu = doc.getEmbedded(List.of("menu", "boba"), Document.class);
+        for (String key : menu.keySet()) {
+            String value = menu.getString(key);
+            System.out.println("Key: " + key + ", Value: " + value);
+        }
     }
 
     public static Document getUserDoc(Long userID) {
         Document doc = checkCache(userID);
+        System.out.println("cache check: " + checkDocNull(doc));
         if (doc != null) {
             return doc;
         } else {
             doc = checkDatabase(userID);
         }
         if (doc != null) {
-            addDocToCache(userID, doc, false);
+            addDocToCache(userID, doc);
             return doc;
         } else if (mongoOK) {
             doc = createNewDoc(userID);
-            addDocToCache(userID, doc, true);
+            addDocToCache(userID, doc);
             return doc;
         } else {
             return null;
@@ -89,12 +90,7 @@ public class Data implements Serializable {
         return doc != null;
     }
     private static Document checkCache(Long userID) {
-        //check existing cache first then new cache
-        Document doc = null;
-        doc = existingUsersCache.getOrDefault(userID, null);
-        doc = (doc != null) ? doc : newUsersCache.getOrDefault(userID, null);
-        System.out.println("cache check: " + checkDocNull(doc));
-        return doc;
+        return userCache.get(userID);
     }
     private static Document checkDatabase(Long userID) {
         Document doc = null;
@@ -107,43 +103,24 @@ public class Data implements Serializable {
             .append("lastCmdUse", Instant.now().getEpochSecond())
             .append("coins", 0);
     }
-    private static void addDocToCache(Long userID, Document document, boolean newUser) {
-        if (newUser) {
-            newUsersCache.put(userID, document);
-        } else {
-            existingUsersCache.put(userID, document);
-        }
+    private static void addDocToCache(Long userID, Document document) {
+        userCache.put(userID, document);
     }
 
+    private static transient final ReplaceOptions replaceOpts = new ReplaceOptions().upsert(true);
+    private static transient final BulkWriteOptions bulkOpts = new BulkWriteOptions().ordered(false);
     private static void syncCacheToDatabase() {
-        System.out.println("sync database");
-    }
-    private static transient ReplaceOptions replaceOpts = new ReplaceOptions().upsert(true);
-    private static void updateExistingCachedUsers() {
-        TreeMap<Long, Document> existingCacheCopy = new TreeMap<>();
-        existingCacheCopy.putAll(existingUsersCache);
-        for (Map.Entry<Long, Document> doc : existingCacheCopy.entrySet()) {
-            Bson query = eq("_id", doc.getKey());
-            try {
-                mongoUsers.replaceOne(query, doc.getValue(), replaceOpts);
-            } catch (Error e) {
-                e.printStackTrace();
-                mongoNotOK();
-                failover.put(doc.getKey(), doc.getValue());
-            }
+        HashMap<Long, Document> userCacheCopy = new HashMap<Long, Document>(userCache);
+        ArrayList<ReplaceOneModel<Document>> writeReqs = new ArrayList<ReplaceOneModel<Document>>(userCacheCopy.size());
+        for (Map.Entry<Long, Document> entry : userCacheCopy.entrySet()) {
+            writeReqs.add(new ReplaceOneModel<Document>(eq("_id", entry.getKey()), entry.getValue(), replaceOpts));
         }
-    }
-    private static void insertNewCachedUsers() {
-        TreeMap<Long, Document> newUserCopy = new TreeMap<>();
-        newUserCopy.putAll(newUsersCache);
-        existingUsersCache.putAll(newUsersCache);
-        newUsersCache.clear();
-        List<Document> newUsersDocs = List.copyOf(newUserCopy.values());
         try {
-            mongoUsers.insertMany(newUsersDocs);
+            mongoUsers.bulkWrite(writeReqs, bulkOpts);
         } catch (Error e) {
             e.printStackTrace();
             mongoNotOK();
         }
+        System.out.println("cached synced");
     }
 }
