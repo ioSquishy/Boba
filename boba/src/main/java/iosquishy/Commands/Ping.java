@@ -10,7 +10,7 @@ public class Ping {
             .setDescription("Pong!");
     }
 
-    public static void handleCommand (SlashCommandInteraction interaction) {
+    public static void runCommand(SlashCommandInteraction interaction) {
         interaction.createImmediateResponder().setContent("Pong! `" + interaction.getApi().getLatestGatewayLatency().toMillis() + "ms`").respond();
     }
 }

@@ -26,7 +26,7 @@ public class BobaGod {
     public static void initBobaMaps() {
         /* Cup Styles */
         //SEALED_CUP:
-        cupImage.put(CupStyle.SEALED_CUP, getImage("src\\main\\resources\\CupStyles\\SEALED_CUP.png"));
+        cupImage.put(CupStyle.SEALED_CUP, getImage("src\\main\\assets\\CupStyles\\SEALED_CUP.png"));
         //CAPPED_CUP:
 
         //JAR:
@@ -34,7 +34,7 @@ public class BobaGod {
 
         /* Tea Image */
         //SEALED_CUP
-        teaImage.put(CupStyle.SEALED_CUP, getImage("src\\main\\resources\\TeaShapes\\SEALED_CUP_TEA.png"));
+        teaImage.put(CupStyle.SEALED_CUP, getImage("src\\main\\assets\\TeaShapes\\SEALED_CUP_TEA.png"));
         //CAPPED_CUP
 
         //JAR
@@ -50,7 +50,7 @@ public class BobaGod {
         ///* Toppings */
 		/* SEALED_CUP */
         //PEARL:
-        sealed_cup_toppingImage.put(Topping.PEARL, getImage("src\\main\\resources\\Toppings\\PEARL.png"));
+        sealed_cup_toppingImage.put(Topping.PEARL, getImage("src\\main\\assets\\Toppings\\PEARL.png"));
         //LYCHEE:
 
         //JELLY:

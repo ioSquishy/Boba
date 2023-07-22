@@ -17,13 +17,16 @@ public class App {
         Data.initMongoDB();
         
         BobaGod.initBobaMaps();
-        SettingCompiler.initSettingMaps();
+        MenuCompiler.initMenuMaps();
         
         System.out.println("yahallo");
 
         //Test Commands [REMOVE BEFORE RELEASE!]
         api.addMessageCreateListener(event -> {
-
+            String cmd = event.getMessageContent();
+            switch (cmd) {
+                case "ping" : event.getMessage().reply("idk lol"); break;
+            }
         });
         
         //Create Commands
@@ -32,8 +35,14 @@ public class App {
         //Run Commands
         api.addSlashCommandCreateListener(event -> {
             SlashCommandInteraction interaction = event.getSlashCommandInteraction();
+            //if database is down dont run commands
+            if (!Data.mongoOK) { 
+                interaction.createImmediateResponder().setContent("Database is currently down :(").respond();
+                return;
+            }
+            //actual commands
             switch (interaction.getCommandName().toString()) {
-                case "ping" : Ping.handleCommand(interaction); break;
+                case "ping" : Ping.runCommand(interaction); break;
             }
         });
     }
