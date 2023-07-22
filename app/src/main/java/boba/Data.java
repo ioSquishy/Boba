@@ -2,12 +2,18 @@ package boba;
 
 import io.github.cdimascio.dotenv.Dotenv;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import static com.mongodb.client.model.Filters.eq;
 import org.bson.Document;
@@ -26,9 +32,20 @@ public class Data implements Serializable {
     private static transient MongoClient mongoClient;
     private static transient MongoDatabase mongoDatabase;
     private static transient MongoCollection<Document> mongoUsers;
-    private static transient boolean mongoOK;
+    public static transient boolean mongoOK;
 
     private static HashMap<Long, Document> userCache = new HashMap<Long, Document>();
+    private static transient ScheduledExecutorService autoCacheExe = Executors.newSingleThreadScheduledExecutor();
+    private static transient Runnable autoCache = () -> {
+        if (mongoOK) {
+            syncCacheToDatabase();
+        } else {
+            mongoNotOK();
+        }
+    };
+    private static transient Runnable checkMongo = () -> {
+        initMongoDB();
+    };
 
     public static void initMongoDB() {
         try {
@@ -37,6 +54,15 @@ public class Data implements Serializable {
             mongoUsers = mongoDatabase.getCollection("users");
             mongoOK = true;
             System.out.println("Database Connected");
+            App.api.getUserById("263049275196309506").join().sendMessage("MongoDB connected!!");
+            if (mongoOK) {
+                autoCacheExe.scheduleAtFixedRate(autoCache, 10, 10, TimeUnit.MINUTES);
+            } else {
+                autoCacheExe.shutdownNow();
+                autoCacheExe = Executors.newSingleThreadScheduledExecutor();
+                autoCacheExe.scheduleAtFixedRate(autoCache, 10, 10, TimeUnit.MINUTES);
+            }
+            System.out.println("autoCacheExe running!");
         } catch (Error e) {
             e.printStackTrace();
             mongoNotOK();
@@ -45,7 +71,29 @@ public class Data implements Serializable {
 
     private static void mongoNotOK() {
         System.out.println("Mongo is NOT OK!!");
-        mongoOK = false;
+        App.api.getUserById("263049275196309506").join().sendMessage("MongoDB failed to connect :(");
+        if (mongoOK) {
+            mongoOK = false;
+            saveCacheManually();
+            autoCacheExe.shutdownNow();
+            autoCacheExe = Executors.newSingleThreadScheduledExecutor();
+            autoCacheExe.scheduleAtFixedRate(checkMongo, 10, 10, TimeUnit.MINUTES);
+        }
+    }
+
+    private static void saveCacheManually() {
+        try {
+            File file = new File("cache.ser");
+            file.createNewFile();
+            FileOutputStream fos = new FileOutputStream(file);
+            ObjectOutputStream out = new ObjectOutputStream(fos);
+            out.writeObject(userCache);
+            out.close();
+            fos.close();
+        } catch (Exception e) {
+            App.api.getUserById("263049275196309506").join().sendMessage("Cache did not manually save........ bAi");
+            App.api.disconnect();
+        }
     }
     
     public static void test() {
@@ -60,10 +108,10 @@ public class Data implements Serializable {
         doc.put("coins", 3);
     }
     public static void testIterate(Document doc) {
-        Document menu = doc.getEmbedded(List.of("menu", "boba"), Document.class);
-        for (String key : menu.keySet()) {
-            String value = menu.getString(key);
-            System.out.println("Key: " + key + ", Value: " + value);
+        Document boba = doc.getEmbedded(List.of("menu", "boba"), Document.class);
+        String[] bobaNames = (String[]) boba.get("bobaNames");
+        for (String bn : bobaNames) {
+            System.out.println(bn);
         }
     }
 

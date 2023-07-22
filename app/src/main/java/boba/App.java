@@ -10,14 +10,13 @@ import org.javacord.api.interaction.SlashCommandInteraction;
 import io.github.cdimascio.dotenv.Dotenv;
 
 public class App {
-    //public static final DiscordApi api = new DiscordApiBuilder().setToken(Dotenv.load().get("TOKEN")).setAllNonPrivilegedIntentsAnd(Intent.GUILD_MESSAGES).login().join();
+    public static final DiscordApi api = new DiscordApiBuilder().setToken(Dotenv.load().get("TOKEN")).setAllNonPrivilegedIntentsAnd(Intent.GUILD_MESSAGES).login().join();
 
     public static void main(String[] args) {
 
         Data.initMongoDB();
-        Data.test();
         
-        /*BobaGod.initBobaMaps();
+        BobaGod.initBobaMaps();
         SettingCompiler.initSettingMaps();
         
         System.out.println("yahallo");
@@ -36,6 +35,6 @@ public class App {
             switch (interaction.getCommandName().toString()) {
                 case "ping" : Ping.handleCommand(interaction); break;
             }
-        });*/
+        });
     }
 }
