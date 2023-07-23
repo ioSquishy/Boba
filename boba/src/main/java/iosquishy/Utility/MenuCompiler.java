@@ -14,12 +14,12 @@ public class MenuCompiler {
     private static HashMap<Menu, Point[]> bobaCoords = new HashMap<>(Menu.values().length);
     public static void initMenuMaps() {
         //WOOD
-        menuImage.put(Menu.WOOD, getImage("src\\main\\assets\\MenuImages\\WOOD.jpg"));
+        menuImage.put(Menu.WOOD, getImage("boba\\src\\main\\assets\\MenuImages\\WOOD.jpg"));
     }
 
     public static Image compileMenu(Menu menu, Image[] bobas) {
         //Create ImgStacker
-        ImgStacker compiledMenu = new ImgStacker(menuImage.get(menu).getWidth(null), menuImage.get(menu).getHeight(null));
+        ImgStacker compiledMenu = new ImgStacker(6000, 3000);
         //Add menu backdrop
         compiledMenu.setLayer("backdrop", menuImage.get(menu));
         //Add boba
