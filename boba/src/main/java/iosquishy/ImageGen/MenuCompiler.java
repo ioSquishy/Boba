@@ -1,5 +1,6 @@
-package iosquishy.Utility;
+package iosquishy.ImageGen;
 
+import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics2D;
 import java.awt.Image;
@@ -17,9 +18,9 @@ public class MenuCompiler {
     private static HashMap<Menu, Point[]> bobaCoords = new HashMap<>(Menu.values().length);
     public static void initMenuMaps() {
         //EMPTY
-        menuImage.put(Menu.EMPTY, getImage("boba\\src\\main\\assets\\MenuImages\\EMPTY.png"));
+        menuImage.put(Menu.EMPTY, BobaGod.getImage("boba\\src\\main\\assets\\MenuImages\\EMPTY.png"));
         //WOOD
-        menuImage.put(Menu.WOOD, getImage("boba\\src\\main\\assets\\MenuImages\\WOOD.jpg"));
+        menuImage.put(Menu.WOOD, BobaGod.getImage("boba\\src\\main\\assets\\MenuImages\\WOOD.jpg"));
     }
 
     private static final short menuImgWidth = 5500;
@@ -33,16 +34,22 @@ public class MenuCompiler {
     private static final short verticalMenuDiv = (menuImgHeight-menuHeaderHeight) / maxVerticalBobas;
     private static final short bobaVerticalCenteredOffset = bobaDimensions + ((verticalMenuDiv-bobaDimensions) / 2);
     private static final short TextDistanceX = (menuImgWidth/maxHorizontalBobas) - ((menuImgWidth/maxHorizontalBobas) - (bobaDimensions+bobaLeftMargin));
+    private static final byte titlePadding = 100;
+    private static final short titleFontSize = menuHeaderHeight-titlePadding;
+    private static final short titleVerticalCenterOffset = titleFontSize + (titlePadding/2);
     public static BufferedImage compileMenu(Menu menu, Image[] bobas, String cafeName) {
         //Create ImgStacker
         ImgStacker compiledMenu = new ImgStacker(menuImgWidth, menuImgHeight);
         //Add menu backdrop
         compiledMenu.setLayer("backdrop", menuImage.get(menu));
         //Add cafe name
-        BufferedImage textImage = new BufferedImage(100, 100, BufferedImage.TYPE_INT_ARGB);
+        BufferedImage textImage = new BufferedImage(menuImgWidth, menuImgHeight, BufferedImage.TYPE_INT_ARGB);
         Graphics2D text = textImage.createGraphics();
-        text.setFont(new Font("Arial", Font.PLAIN, 20));
-        text.drawString(cafeName, 20, 20);
+        text.setFont(new Font("Arial", Font.PLAIN, titleFontSize));
+        int fontWidth = text.getFontMetrics().stringWidth(cafeName);
+        int textCenteredDisplacement = ((menuImgWidth - fontWidth) / 2);
+        System.out.println("textCenteredDisplacement: "+textCenteredDisplacement);
+        text.drawString(cafeName, textCenteredDisplacement, titleVerticalCenterOffset);
         text.dispose();
         compiledMenu.setLayer("cafeName", textImage);
         //Add boba
@@ -50,32 +57,22 @@ public class MenuCompiler {
         for (byte bobaImgX = 0; bobaImgX < maxHorizontalBobas; bobaImgX++)  {
             for (byte bobaImgY = 1; bobaImgY <= maxVerticalBobas; bobaImgY++) {
                 // System.out.println("boba x: " + bobaImgX + "\nboba y:" + bobaImgY);
-                System.out.println("currentboba: " + currentBoba);
+                // System.out.println("currentboba: " + currentBoba);
                 if (currentBoba < bobas.length) {
                     // System.out.println("passed check");
                     int currentBobaX = (bobaImgX*horizontalMenuDiv) + bobaLeftMargin;
                     int currentBobaY = menuHeaderHeight + (bobaImgY*verticalMenuDiv - bobaVerticalCenteredOffset);
-                    System.out.println("cbobax: " + currentBobaX + "\ncbobay: " + currentBobaY);
+                    // System.out.println("cbobax: " + currentBobaX + "\ncbobay: " + currentBobaY);
                     compiledMenu.setLayer(""+currentBoba, bobas[currentBoba], currentBobaX, currentBobaY);
                     currentBoba++;
                 } else {
                     break;
                 }
-                System.out.println();
+                // System.out.println();
             }
         }
         //Return
         return compiledMenu.getStackedImage();
-    }
-
-    /**
-     * Gets an image from the specified filepath.
-     * 
-     * @param filePath Image file path.
-     * @return Image
-     */
-    private static Image getImage(String filePath) {
-        return new ImageIcon(filePath).getImage();
     }
 }
 

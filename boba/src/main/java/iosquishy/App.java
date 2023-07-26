@@ -1,6 +1,6 @@
 package iosquishy;
 import iosquishy.Commands.*;
-import iosquishy.Utility.*;
+import iosquishy.ImageGen.*;
 
 import javax.swing.ImageIcon;
 

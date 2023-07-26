@@ -1,4 +1,4 @@
-package iosquishy.Utility;
+package iosquishy.ImageGen;
 
 import java.awt.Image;
 import java.awt.image.BufferedImage;
@@ -124,7 +124,7 @@ public class BobaGod {
      * @param color Color to make opaque pixels in image.
      * @return Edited BufferedImage.
      */
-    private static BufferedImage recolorImage(Image image, Color color) {
+    public static BufferedImage recolorImage(Image image, Color color) {
         int width = image.getWidth(null);
         int height = image.getHeight(null);
 
@@ -151,7 +151,7 @@ public class BobaGod {
      * @param filePath Image file path.
      * @return Image
      */
-    private static Image getImage(String filePath) {
+    public static Image getImage(String filePath) {
         return new ImageIcon(filePath).getImage();
     }
 }

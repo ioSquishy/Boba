@@ -1,4 +1,4 @@
-package iosquishy.Utility;
+package iosquishy.ImageGen;
 
 import java.awt.Image;
 import java.awt.Graphics;
