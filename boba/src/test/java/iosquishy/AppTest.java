@@ -54,7 +54,7 @@ class Test {
 
         File outputfile = new File("output.png");
         try {
-            ImageIO.write(menu.compileMenu(Menu.EMPTY, testImages), "png", outputfile);
+            ImageIO.write(menu.compileMenu(Menu.EMPTY, testImages, "hai"), "png", outputfile);
         } catch (IOException e) {
             e.printStackTrace();
         }
