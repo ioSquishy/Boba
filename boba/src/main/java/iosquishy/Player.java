@@ -1,5 +1,6 @@
 package iosquishy;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -9,6 +10,8 @@ import org.bson.Document;
 public class Player {
     //coins
     public static int getCoins(long userID) {
+        Document doc = Data.getUserDoc(userID);
+        long lastCoinUpdate = (long) doc.get("lastCoinUpdate");
         return (int) Data.getUserDoc(userID).get("coins");
     }
     /**

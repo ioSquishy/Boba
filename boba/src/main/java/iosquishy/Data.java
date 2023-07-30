@@ -7,8 +7,10 @@ import java.io.FileOutputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.time.Instant;
+import java.time.temporal.TemporalField;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Executors;
@@ -129,7 +131,7 @@ public class Data implements Serializable {
     private static Document createNewDoc(Long userID) {
         return new Document()
             .append("_id", userID)
-            .append("lastCmdUse", Instant.now().getEpochSecond())
+            .append("lastCoinUpdate", (int) Instant.now().getEpochSecond()/60)
             .append("coins", 0)
             .append("bobaNames", Arrays.asList("null"))
             .append("bobaImages", Arrays.asList("null"))
