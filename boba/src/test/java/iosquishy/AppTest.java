@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 import javax.imageio.ImageIO;
 
@@ -21,15 +22,28 @@ import iosquishy.ImageGen.BobaGod.Topping;
 import iosquishy.ImageGen.MenuCompiler.Menu;
 
 class Test {
+    private static enum test{
+        A, B, C
+    }
     public static void main(String[] args) {
         // BufferedImage img = ImgEditor.getImageFromURL("https://cdn.discordapp.com/attachments/818275525797609472/1132459889692770416/image.png");
-        Data.initMongoDB();
+        String[] test = new String[10];
+        for (String t : test) {
+            System.out.print(t + ", ");
+        }
+        System.out.println();
+        test[2] = "hai";
+        for (String t : test) {
+            System.out.print(t + ", ");
+        }
+        // Data.initMongoDB();
 
-        long userID = 263049275196309506L;
-        System.out.println(Player.getCoins(userID));
-        Player.addCoins(userID, (short) 2);
-        System.out.println(Player.getCoins(userID));
-        Player.getBobas2(userID);
+        // long userID = 263049275196309506L;
+        // System.out.println(Player.getCoins(userID));
+        // Player.addCoins(userID, (short) 2);
+        // System.out.println(Player.getCoins(userID));
+
+
 
         // BobaGod.initBobaMaps();
 
