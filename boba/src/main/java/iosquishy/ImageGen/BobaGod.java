@@ -6,8 +6,6 @@ import java.awt.Color;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import javax.swing.ImageIcon;
-
 public class BobaGod {
     public static enum CupStyle {
         SEALED_CUP, CAPPED_CUP, JAR
@@ -26,7 +24,7 @@ public class BobaGod {
     public static void initBobaMaps() {
         /* Cup Styles */
         //SEALED_CUP:
-        cupImage.put(CupStyle.SEALED_CUP, getImage("boba\\src\\main\\assets\\CupStyles\\SEALED_CUP.png"));
+        cupImage.put(CupStyle.SEALED_CUP, ImgEditor.getImageFromPath("boba\\src\\main\\assets\\CupStyles\\SEALED_CUP.png"));
         //CAPPED_CUP:
 
         //JAR:
@@ -34,7 +32,7 @@ public class BobaGod {
 
         /* Tea Image */
         //SEALED_CUP
-        teaImage.put(CupStyle.SEALED_CUP, getImage("boba\\src\\main\\assets\\TeaShapes\\SEALED_CUP_TEA.png"));
+        teaImage.put(CupStyle.SEALED_CUP, ImgEditor.getImageFromPath("boba\\src\\main\\assets\\TeaShapes\\SEALED_CUP_TEA.png"));
         //CAPPED_CUP
 
         //JAR
@@ -50,7 +48,7 @@ public class BobaGod {
         ///* Toppings */
 		/* SEALED_CUP */
         //PEARL:
-        sealed_cup_toppingImage.put(Topping.PEARL, getImage("boba\\src\\main\\assets\\Toppings\\PEARL.png"));
+        sealed_cup_toppingImage.put(Topping.PEARL, ImgEditor.getImageFromPath("boba\\src\\main\\assets\\Toppings\\PEARL.png"));
         //LYCHEE:
 
         //JELLY:
@@ -62,13 +60,13 @@ public class BobaGod {
     }
     
     //Local Stuff
-    private ImgStacker boba;
+    private ImgEditor boba;
     private CupStyle cup = null;
     private Tea tea = null;
     private ArrayList<Topping> toppings = new ArrayList<Topping>();
 
     public BobaGod() {
-        this.boba = new ImgStacker(512, 512);
+        this.boba = new ImgEditor(512, 512);
     }
 
     //Set Methods
@@ -92,11 +90,11 @@ public class BobaGod {
     }
 
     //Return methods
-    //drink -> toppings -> cup
+    //drink -> toppings -> cup -> add metadata
     public BufferedImage getBoba() {
         if (this.cup!=null) {
             if (this.tea != null) {
-                this.boba.setLayer("drink", recolorImage(teaImage.get(cup), teaColor.get(tea)));
+                this.boba.setLayer("drink", ImgEditor.recolorImage(teaImage.get(cup), teaColor.get(tea)));
                 if (!toppings.isEmpty()) {
                     for (Topping topping : toppings) {
                         this.boba.setLayer(topping.toString(), sealed_cup_toppingImage.get(topping));
@@ -105,7 +103,13 @@ public class BobaGod {
             }
             this.boba.setLayer("cup", cupImage.get(cup));
         }
-        return boba.getStackedImage();
+        BufferedImage preMetaImage = boba.getEditedImage();
+        return preMetaImage;
+        // HashMap<String, String> metadata = new HashMap<>();
+        // metadata.put("cupStyle", cup.toString());
+        // metadata.put("tea", tea.toString());
+        // metadata.put("toppings", toppings.toString());
+        // return ImgEditor.infuseMetadata(preMetaImage, metadata);
     }
     public CupStyle getCupStyle() {
         return cup;
@@ -115,43 +119,5 @@ public class BobaGod {
     }
     public Topping[] getToppings() {
         return (Topping[]) toppings.toArray();
-    }
-
-    /**
-     * Changes opaque pixels on an image to specified color.
-     * 
-     * @param image Image to edit.
-     * @param color Color to make opaque pixels in image.
-     * @return Edited BufferedImage.
-     */
-    public static BufferedImage recolorImage(Image image, Color color) {
-        int width = image.getWidth(null);
-        int height = image.getHeight(null);
-
-        //Convert Image to BufferedImage
-        BufferedImage bimage = new BufferedImage(width, height, 2);
-        bimage.createGraphics().drawImage(image, 0, 0, null);
-
-        //Recolor pixels in the BufferedImage
-        for (int x = 0; x < width; x++) {
-            for (int y = 0; y < height; y++) {
-                Color originalColor = new Color(bimage.getRGB(x, y), true);
-                //Checks if original pixel was opaque
-                if (originalColor.getAlpha() == 255) {
-                    bimage.setRGB(x, y, color.getRGB());
-                }
-            }
-        }
-        return bimage;
-    }
-
-    /**
-     * Gets an image from the specified filepath.
-     * 
-     * @param filePath Image file path.
-     * @return Image
-     */
-    public static Image getImage(String filePath) {
-        return new ImageIcon(filePath).getImage();
     }
 }

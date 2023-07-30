@@ -1,14 +1,20 @@
 package iosquishy.ImageGen;
 
 import java.awt.Image;
+import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Point;
 import java.awt.image.BufferedImage;
+import java.io.IOException;
+import java.net.URL;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-public class ImgStacker {
+import javax.imageio.ImageIO;
+import javax.swing.ImageIcon;
+
+public class ImgEditor {
     private final BufferedImage stackedImage;
     private final LinkedHashMap<String, Image> layers = new LinkedHashMap<>();
     private final HashMap<String, Point> transforms = new HashMap<>();
@@ -19,7 +25,7 @@ public class ImgStacker {
      * @param width Width of image.
      * @param height Height of image.
      */
-    public ImgStacker(int width, int height) {
+    public ImgEditor(int width, int height) {
         this.stackedImage = new BufferedImage(width, height, 2);
     }
 
@@ -59,11 +65,11 @@ public class ImgStacker {
     }
 
     /**
-     * Returns the stacked image.
+     * Returns the image.
      * 
      * @return Image
      */
-    public BufferedImage getStackedImage() {
+    public BufferedImage getEditedImage() {
         Graphics graphics = this.stackedImage.createGraphics();
         for (Map.Entry<String, Image> entry : this.layers.entrySet()) {
             String layerName = entry.getKey();
@@ -76,5 +82,58 @@ public class ImgStacker {
             }
         }
         return stackedImage;
+    }
+
+    /**
+     * Changes opaque pixels on an image to specified color.
+     * 
+     * @param image Image to edit.
+     * @param color Color to make opaque pixels in image.
+     * @return Edited BufferedImage.
+     */
+    public static BufferedImage recolorImage(Image image, Color color) {
+        int width = image.getWidth(null);
+        int height = image.getHeight(null);
+
+        //Convert Image to BufferedImage
+        BufferedImage bimage = new BufferedImage(width, height, 2);
+        bimage.createGraphics().drawImage(image, 0, 0, null);
+
+        //Recolor pixels in the BufferedImage
+        for (int x = 0; x < width; x++) {
+            for (int y = 0; y < height; y++) {
+                Color originalColor = new Color(bimage.getRGB(x, y), true);
+                //Checks if original pixel was opaque
+                if (originalColor.getAlpha() == 255) {
+                    bimage.setRGB(x, y, color.getRGB());
+                }
+            }
+        }
+        return bimage;
+    }
+
+    /**
+     * Gets an image from the specified filepath.
+     * 
+     * @param filePath Image file path.
+     * @return Image
+     */
+    public static Image getImageFromPath(String filePath) {
+        return new ImageIcon(filePath).getImage();
+    }
+
+    /**
+     * Gets an image from specified URL.
+     * 
+     * @param url Url as string.
+     * @return Image
+     */
+    public static BufferedImage getImageFromURL(String url) {
+        try {
+            return ImageIO.read(new URL(url));
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 }

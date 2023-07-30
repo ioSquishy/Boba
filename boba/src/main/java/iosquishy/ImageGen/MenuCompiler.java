@@ -1,26 +1,21 @@
 package iosquishy.ImageGen;
 
-import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics2D;
 import java.awt.Image;
-import java.awt.Point;
 import java.awt.image.BufferedImage;
 import java.util.HashMap;
-
-import javax.swing.ImageIcon;
 
 public class MenuCompiler {
     public static enum Menu {
         EMPTY, WOOD
     }
     private static HashMap<Menu, Image> menuImage = new HashMap<>(Menu.values().length);
-    private static HashMap<Menu, Point[]> bobaCoords = new HashMap<>(Menu.values().length);
     public static void initMenuMaps() {
         //EMPTY
-        menuImage.put(Menu.EMPTY, BobaGod.getImage("boba\\src\\main\\assets\\MenuImages\\EMPTY.png"));
+        menuImage.put(Menu.EMPTY, ImgEditor.getImageFromPath("boba\\src\\main\\assets\\MenuImages\\EMPTY.png"));
         //WOOD
-        menuImage.put(Menu.WOOD, BobaGod.getImage("boba\\src\\main\\assets\\MenuImages\\WOOD.jpg"));
+        menuImage.put(Menu.WOOD, ImgEditor.getImageFromPath("boba\\src\\main\\assets\\MenuImages\\WOOD.jpg"));
     }
 
     private static final short menuImgWidth = 5500;
@@ -39,7 +34,7 @@ public class MenuCompiler {
     private static final short titleVerticalCenterOffset = titleFontSize + (titlePadding/2);
     public static BufferedImage compileMenu(Menu menu, Image[] bobas, String cafeName) {
         //Create ImgStacker
-        ImgStacker compiledMenu = new ImgStacker(menuImgWidth, menuImgHeight);
+        ImgEditor compiledMenu = new ImgEditor(menuImgWidth, menuImgHeight);
         //Add menu backdrop
         compiledMenu.setLayer("backdrop", menuImage.get(menu));
         //Add cafe name
@@ -72,7 +67,7 @@ public class MenuCompiler {
             }
         }
         //Return
-        return compiledMenu.getStackedImage();
+        return compiledMenu.getEditedImage();
     }
 }
 

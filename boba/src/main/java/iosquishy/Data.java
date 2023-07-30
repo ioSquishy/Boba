@@ -8,6 +8,8 @@ import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -54,13 +56,13 @@ public class Data implements Serializable {
             mongoUsers = mongoDatabase.getCollection("users");
             mongoOK = true;
             System.out.println("Database Connected");
-            App.api.getUserById("263049275196309506").join().sendMessage("MongoDB connected!!");
+            // App.api.getUserById("263049275196309506").join().sendMessage("MongoDB connected!!");
             if (mongoOK) {
-                autoCacheExe.scheduleAtFixedRate(autoCache, 10, 10, TimeUnit.MINUTES);
+                autoCacheExe.scheduleAtFixedRate(autoCache, 10, 10, TimeUnit.SECONDS);
             } else {
                 autoCacheExe.shutdownNow();
                 autoCacheExe = Executors.newSingleThreadScheduledExecutor();
-                autoCacheExe.scheduleAtFixedRate(autoCache, 10, 10, TimeUnit.MINUTES);
+                autoCacheExe.scheduleAtFixedRate(autoCache, 10, 10, TimeUnit.SECONDS);
             }
             System.out.println("autoCacheExe running!");
         } catch (Error e) {
@@ -93,25 +95,6 @@ public class Data implements Serializable {
         } catch (Exception e) {
             App.api.getUserById("263049275196309506").join().sendMessage("Cache did not manually save........ bAi");
             App.api.disconnect();
-        }
-    }
-    
-    public static void test() {
-        System.out.println(getUserDoc(263049275196309506L).get("coins").toString());
-        System.out.println("cache: " + userCache.keySet().toString());
-
-        testIterate(getUserDoc(263049275196309506L));
-
-        //syncCacheToDatabase();
-    }
-    public static void testUpdate(Document doc) {
-        doc.put("coins", 3);
-    }
-    public static void testIterate(Document doc) {
-        Document boba = doc.getEmbedded(List.of("menu", "boba"), Document.class);
-        String[] bobaNames = (String[]) boba.get("bobaNames");
-        for (String bn : bobaNames) {
-            System.out.println(bn);
         }
     }
 
@@ -149,7 +132,11 @@ public class Data implements Serializable {
         return new Document()
             .append("_id", userID)
             .append("lastCmdUse", Instant.now().getEpochSecond())
-            .append("coins", 0);
+            .append("coins", 0)
+            .append("bobaNames", Arrays.asList("null"))
+            .append("bobaImages", Arrays.asList("null"))
+            .append("bobaElements", Arrays.asList("null"))
+            .append("menuTheme", "null");
     }
     private static void addDocToCache(Long userID, Document document) {
         userCache.put(userID, document);
