@@ -9,10 +9,63 @@ import org.bson.Document;
 
 public class Player {
     //coins
+    public static int getCoins2(long userID) {
+        Document doc = Data.getUserDoc(userID);
+        int coins = doc.get("coins", 0);
+        int coinsPerMinute = doc.get("coinsPerMinute", 0);
+        long currentMinute = Instant.now().getEpochSecond()/60;
+        long lastCoinUpdate = doc.get("lastCoinUpdate", currentMinute);
+        return doc.get("coinBonusMultiplier", 1) > 1 
+            ? (doc.get("coinBonusEnd", 0)-(currentMinute)) >= 0 
+            ? updateCoinsAndMultiplier(doc, (int) (coins+((currentMinute-lastCoinUpdate)*(coinsPerMinute*doc.get("coinBonusMultiplier", 1)))), false)
+            : updateCoinsAndMultiplier(doc, (int) (coins+((doc.get("coinBonusEnd", 0L)-lastCoinUpdate)*(coinsPerMinute*doc.get("coinBonusMultiplier", 1)))+(Math.abs(doc.get("coinBonusEnd", 0L)-currentMinute)*coinsPerMinute)), true)
+            : updateCoinsAndMultiplier(doc, (int) (coins+(currentMinute-lastCoinUpdate)*coinsPerMinute), false);
+    }
     public static int getCoins(long userID) {
         Document doc = Data.getUserDoc(userID);
-        long lastCoinUpdate = (long) doc.get("lastCoinUpdate");
-        return (int) Data.getUserDoc(userID).get("coins");
+        // int coins = doc.get("coins", 0);
+        // int coinsPerMinute = doc.get("coinsPerMinute", 0);
+        // long currentMinute = Instant.now().getEpochSecond()/60;
+        // long lastCoinUpdate = doc.get("lastCoinUpdate", currentMinute);
+        // doc.put("lastCoinUpdate", currentMinute);
+        // long timeElapsedFromLastCoinUpdate = currentMinute-lastCoinUpdate;
+        // //bonus
+        // int bonusMultiplier = doc.get("coinBonusMultiplier", 1);
+        // if (bonusMultiplier > 1) {
+        //     long bonusEndMinute = doc.get("coinBonusEnd", 0L);
+        //     long bonusTimeLeft = bonusEndMinute - currentMinute;
+        //     if (bonusTimeLeft >= 0) { //still time left before bonus ends
+        //         coins += timeElapsedFromLastCoinUpdate*(coinsPerMinute*bonusMultiplier);
+        //         doc.put("coins", coins);
+        //         return coins;
+        //     } else { //bonus has ended
+        //         long bonusTimeElapsed = bonusEndMinute-lastCoinUpdate;
+        //         long remainingCoinsToAdd = Math.abs(bonusTimeLeft)*coinsPerMinute;
+        //         coins += (bonusTimeElapsed*(coinsPerMinute*bonusMultiplier)) + remainingCoinsToAdd;
+        //         doc.put("coinBonusMultiplier", 1);
+        //         doc.put("coins", coins);
+        //         return coins;
+        //     }
+        // } else {
+        //     coins += timeElapsedFromLastCoinUpdate*coinsPerMinute;
+        //     doc.put("coins", coins);
+        //     return coins;
+        // }
+        
+        return doc.get("coinBonusMultiplier", 1) > 1 
+            ? (doc.get("coinBonusEnd", 0)-(Instant.now().getEpochSecond()/60)) >= 0 
+            ? updateCoinsAndMultiplier(doc, (int) (doc.get("coins", 0)+(((Instant.now().getEpochSecond()/60)-doc.get("lastCoinUpdate", Instant.now().getEpochSecond()/60))*(doc.get("coinsPerMinute", 0)*doc.get("coinBonusMultiplier", 1)))), false)
+            : updateCoinsAndMultiplier(doc, (int) (doc.get("coins", 0)+((doc.get("coinBonusEnd", 0L)-doc.get("lastCoinUpdate", Instant.now().getEpochSecond()/60))*(doc.get("coinsPerMinute", 0)*doc.get("coinBonusMultiplier", 1)))+(Math.abs(doc.get("coinBonusEnd", 0L)-Instant.now().getEpochSecond()/60)*doc.get("coinsPerMinute", 0))), true)
+            : updateCoinsAndMultiplier(doc, (int) (doc.get("coins", 0)+(Instant.now().getEpochSecond()/60-doc.get("lastCoinUpdate", Instant.now().getEpochSecond()/60))*doc.get("coinsPerMinute", 0)), false);
+    }
+    //helper method
+    private static int updateCoinsAndMultiplier(Document doc, int coins, boolean resetBonusMultiplier) {
+        doc.put("lastCoinUpdate", Instant.now().getEpochSecond()/60);
+        doc.put("coins", coins);
+        if (resetBonusMultiplier) {
+            doc.put("coinBonusMultiplier", 1);
+        }
+        return coins;
     }
     /**
      * 
@@ -23,6 +76,21 @@ public class Player {
         Document doc = Data.getUserDoc(userID);
         int currentCoins = (int) doc.get("coins");
         doc.put("coins", currentCoins+coins);
+    }
+    public static void setCoinsPerMinute(long userID, int coinsPerMinute) {
+        Document doc = Data.getUserDoc(userID);
+        doc.put("coinsPerMinute", coinsPerMinute);
+    }
+    /**
+     * 
+     * @param userID
+     * @param multiplier gets multiplied against the usual coinsPerMinute value
+     * @param minutes sets how long the multiplier will last in minutes
+     */
+    public static void setCoinBonusMultiplier(long userID, int multiplier, short minutes) {
+        Document doc = Data.getUserDoc(userID);
+        doc.put("coinBonusMultiplier", multiplier);
+        doc.put("coinBonusEnd", (Instant.now().getEpochSecond()/60) + minutes);
     }
 
     //bobas
@@ -62,7 +130,7 @@ public class Player {
         ogBobas.get(0).add(bobaName);
         ogBobas.get(1).add(bobaImage);
         ogBobas.get(2).add(bobaElements);
-        updateBobas(doc, ogBobas);
+        updateBobasViaList(doc, ogBobas);
     }
     public static void removeBoba(long userID, byte indexOfBoba) {
         Document doc = Data.getUserDoc(userID);
@@ -70,7 +138,7 @@ public class Player {
         ogBobas.get(0).remove(indexOfBoba);
         ogBobas.get(1).remove(indexOfBoba);
         ogBobas.get(2).remove(indexOfBoba);
-        updateBobas(doc, ogBobas);
+        updateBobasViaList(doc, ogBobas);
     }
     public static void renameBoba(long userID, byte indexOfBoba, String newName) {
         Document doc = Data.getUserDoc(userID);
@@ -81,9 +149,9 @@ public class Player {
     //boba helper methods
     private static List<List<String>> getBobaList(Document doc) {
         List<List<String>> boba =  new ArrayList<>();
-        boba.add((List<String>) doc.get("bobaNames"));
-        boba.add((List<String>) doc.get("bobaImages"));
-        boba.add((List<String>) doc.get("bobaElements"));
+        boba.add(doc.get("bobaNames", new ArrayList<String>()));
+        boba.add(doc.get("bobaImages", new ArrayList<String>()));
+        boba.add(doc.get("bobaElements", new ArrayList<String>()));
         return boba;
     }
     private static String[][] getBobaArray(Document doc) {
@@ -92,7 +160,7 @@ public class Player {
         String[] bobaElements = (String[]) doc.get("bobaElements");
         return new String[][] {bobaNames, bobaImages, bobaElements};
     }
-    private static void updateBobas(Document doc, List<List<String>> bobas) {
+    private static void updateBobasViaList(Document doc, List<List<String>> bobas) {
         doc.put("bobaNames", bobas.get(0));
         doc.put("bobaImages", bobas.get(1));
         doc.put("bobaElements", bobas.get(2));

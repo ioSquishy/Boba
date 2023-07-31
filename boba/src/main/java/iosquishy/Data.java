@@ -11,6 +11,7 @@ import java.time.temporal.TemporalField;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Executors;
@@ -100,7 +101,6 @@ public class Data implements Serializable {
 
     public static Document getUserDoc(Long userID) {
         Document doc = checkCache(userID);
-        System.out.println("cache check: " + checkDocNull(doc));
         if (doc != null) {
             return doc;
         } else {
@@ -117,25 +117,24 @@ public class Data implements Serializable {
             return null;
         }
     }
-    private static boolean checkDocNull(Document doc) {
-        return doc != null;
-    }
     private static Document checkCache(Long userID) {
         return userCache.get(userID);
     }
     private static Document checkDatabase(Long userID) {
-        Document doc = null;
-        System.out.println("database check: " + checkDocNull(doc));
-        return doc = mongoOK ? mongoUsers.find(eq("_id", userID)).first() : null;
+        // Document doc = null;
+        return mongoOK ? mongoUsers.find(eq("_id", userID)).first() : null;
     }
     private static Document createNewDoc(Long userID) {
         return new Document()
             .append("_id", userID)
-            .append("lastCoinUpdate", (int) Instant.now().getEpochSecond()/60)
             .append("coins", 0)
-            .append("bobaNames", Arrays.asList("null"))
-            .append("bobaImages", Arrays.asList("null"))
-            .append("bobaElements", Arrays.asList("null"))
+            .append("coinsPerMinute", 0)
+            .append("lastCoinUpdate", Instant.now().getEpochSecond()/60)
+            .append("coinBonusMultiplier", 1)
+            .append("coinBonusEnd", 0)
+            .append("bobaNames", Collections.EMPTY_LIST)
+            .append("bobaImages", Collections.EMPTY_LIST)
+            .append("bobaElements", Collections.EMPTY_LIST)
             .append("menuTheme", "null");
     }
     private static void addDocToCache(Long userID, Document document) {
@@ -147,8 +146,12 @@ public class Data implements Serializable {
     private static void syncCacheToDatabase() {
         HashMap<Long, Document> userCacheCopy = new HashMap<Long, Document>(userCache);
         ArrayList<ReplaceOneModel<Document>> writeReqs = new ArrayList<ReplaceOneModel<Document>>(userCacheCopy.size());
+        long currentMinute = Instant.now().getEpochSecond()/60;
         for (Map.Entry<Long, Document> entry : userCacheCopy.entrySet()) {
             writeReqs.add(new ReplaceOneModel<Document>(eq("_id", entry.getKey()), entry.getValue(), replaceOpts));
+            if (currentMinute - entry.getValue().get("lastCoinUpdate", Instant.now().getEpochSecond()/60) > 30) { //removes doc from cache if they havent used a cmd in 30 mins
+                userCache.remove(entry.getKey());
+            }
         }
         try {
             mongoUsers.bulkWrite(writeReqs, bulkOpts);
@@ -157,5 +160,9 @@ public class Data implements Serializable {
             mongoNotOK();
         }
         System.out.println("cached synced");
+    }
+
+    public static void clearCache() {
+        userCache.clear();
     }
 }

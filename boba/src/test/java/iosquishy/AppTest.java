@@ -10,6 +10,9 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import javax.imageio.ImageIO;
 
@@ -22,21 +25,117 @@ import iosquishy.ImageGen.BobaGod.Topping;
 import iosquishy.ImageGen.MenuCompiler.Menu;
 
 class Test {
-    private static enum test{
-        A, B, C
-    }
+    private static ScheduledExecutorService exe = Executors.newSingleThreadScheduledExecutor();
     public static void main(String[] args) {
         // BufferedImage img = ImgEditor.getImageFromURL("https://cdn.discordapp.com/attachments/818275525797609472/1132459889692770416/image.png");
-        String[] test = new String[10];
-        for (String t : test) {
-            System.out.print(t + ", ");
-        }
-        System.out.println();
-        test[2] = "hai";
-        for (String t : test) {
-            System.out.print(t + ", ");
-        }
-        // Data.initMongoDB();
+        
+        Data.initMongoDB();
+
+        long userID = 263049275196309506L;
+        // System.out.println(Player.getCoins(userID));
+        // Player.setCoinsPerMinute(userID, 10);
+
+        exe.schedule(() -> {
+            System.out.println("1");
+            long start = System.nanoTime();
+            Player.getCoins(userID);
+            long end = System.nanoTime();
+            System.out.println(end-start);
+            System.out.println();
+            Data.clearCache();
+        }, 4, TimeUnit.SECONDS);
+
+        exe.schedule(() -> {
+            System.out.println("2");
+            long start = System.nanoTime();
+            Player.getCoins2(userID);
+            long end = System.nanoTime();
+            System.out.println(end-start);
+            System.out.println();
+            Data.clearCache();
+        }, 8, TimeUnit.SECONDS);
+
+        exe.schedule(() -> {
+            System.out.println("1");
+            long start = System.nanoTime();
+            Player.getCoins(userID);
+            long end = System.nanoTime();
+            System.out.println(end-start);
+            System.out.println();
+            Data.clearCache();
+        }, 12, TimeUnit.SECONDS);
+
+        exe.schedule(() -> {
+            System.out.println("2");
+            long start = System.nanoTime();
+            Player.getCoins2(userID);
+            long end = System.nanoTime();
+            System.out.println(end-start);
+            System.out.println();
+            Data.clearCache();
+        }, 16, TimeUnit.SECONDS);
+
+        exe.schedule(() -> {
+            System.out.println("1");
+            long start = System.nanoTime();
+            Player.getCoins(userID);
+            long end = System.nanoTime();
+            System.out.println(end-start);
+            System.out.println();
+            Data.clearCache();
+        }, 20, TimeUnit.SECONDS);
+
+        exe.schedule(() -> {
+            System.out.println("2");
+            long start = System.nanoTime();
+            Player.getCoins2(userID);
+            long end = System.nanoTime();
+            System.out.println(end-start);
+            System.out.println();
+            Data.clearCache();
+        }, 24, TimeUnit.SECONDS);
+
+        exe.schedule(() -> {
+            System.out.println("1");
+            long start = System.nanoTime();
+            Player.getCoins(userID);
+            long end = System.nanoTime();
+            System.out.println(end-start);
+            System.out.println();
+            Data.clearCache();
+        }, 28, TimeUnit.SECONDS);
+
+        exe.schedule(() -> {
+            System.out.println("2");
+            long start = System.nanoTime();
+            Player.getCoins2(userID);
+            long end = System.nanoTime();
+            System.out.println(end-start);
+            System.out.println();
+            Data.clearCache();
+        }, 32, TimeUnit.SECONDS);
+
+        // exe.schedule(() -> {
+        //     System.out.println("\nfirst op");
+        //     checkCoins(userID);
+        //     Player.setCoinBonusMultiplier(userID, 2, (short) 2);
+        //     System.out.println("bonus set for 2 mins");
+        // }, 62, TimeUnit.SECONDS);
+
+        // exe.schedule(() -> {
+        //     System.out.println("\nsecond op");
+        //     checkCoins(userID);
+        // }, 62*2, TimeUnit.SECONDS);
+
+        // exe.schedule(() -> {
+        //     System.out.println("\nthird op, 2 mins passed");
+        //     checkCoins(userID);
+        // }, 62*3, TimeUnit.SECONDS);
+
+        // exe.schedule(() -> {
+        //     System.out.println("\nfourth op, 3 mins passed");
+        //     checkCoins(userID);
+        // }, 62*4, TimeUnit.SECONDS);
 
         // long userID = 263049275196309506L;
         // System.out.println(Player.getCoins(userID));
@@ -61,6 +160,10 @@ class Test {
         // } catch (IOException e) {
         //     e.printStackTrace();
         // }
+    }
+
+    static void checkCoins(long userID) {
+        System.out.println("coins " + Player.getCoins(userID));
     }
 
 }
