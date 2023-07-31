@@ -9,18 +9,6 @@ import org.bson.Document;
 
 public class Player {
     //coins
-    public static int getCoins2(long userID) {
-        Document doc = Data.getUserDoc(userID);
-        int coins = doc.get("coins", 0);
-        int coinsPerMinute = doc.get("coinsPerMinute", 0);
-        long currentMinute = Instant.now().getEpochSecond()/60;
-        long lastCoinUpdate = doc.get("lastCoinUpdate", currentMinute);
-        return doc.get("coinBonusMultiplier", 1) > 1 
-            ? (doc.get("coinBonusEnd", 0)-(currentMinute)) >= 0 
-            ? updateCoinsAndMultiplier(doc, (int) (coins+((currentMinute-lastCoinUpdate)*(coinsPerMinute*doc.get("coinBonusMultiplier", 1)))), false)
-            : updateCoinsAndMultiplier(doc, (int) (coins+((doc.get("coinBonusEnd", 0L)-lastCoinUpdate)*(coinsPerMinute*doc.get("coinBonusMultiplier", 1)))+(Math.abs(doc.get("coinBonusEnd", 0L)-currentMinute)*coinsPerMinute)), true)
-            : updateCoinsAndMultiplier(doc, (int) (coins+(currentMinute-lastCoinUpdate)*coinsPerMinute), false);
-    }
     public static int getCoins(long userID) {
         Document doc = Data.getUserDoc(userID);
         // int coins = doc.get("coins", 0);
@@ -29,7 +17,6 @@ public class Player {
         // long lastCoinUpdate = doc.get("lastCoinUpdate", currentMinute);
         // doc.put("lastCoinUpdate", currentMinute);
         // long timeElapsedFromLastCoinUpdate = currentMinute-lastCoinUpdate;
-        // //bonus
         // int bonusMultiplier = doc.get("coinBonusMultiplier", 1);
         // if (bonusMultiplier > 1) {
         //     long bonusEndMinute = doc.get("coinBonusEnd", 0L);
