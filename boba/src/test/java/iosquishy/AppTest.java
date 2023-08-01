@@ -32,110 +32,30 @@ class Test {
         Data.initMongoDB();
 
         long userID = 263049275196309506L;
-        // System.out.println(Player.getCoins(userID));
-        // Player.setCoinsPerMinute(userID, 10);
+        System.out.println(Player.getCoins(userID));
+        Player.setCoinsPerMinute(userID, 10);
 
         exe.schedule(() -> {
-            System.out.println("1");
-            long start = System.nanoTime();
-            Player.getCoins(userID);
-            long end = System.nanoTime();
-            System.out.println(end-start);
-            System.out.println();
-            Data.clearCache();
-        }, 4, TimeUnit.SECONDS);
+            System.out.println("\nfirst op");
+            checkCoins(userID);
+            Player.setCoinBonusMultiplier(userID, 2, (short) 2);
+            System.out.println("bonus set for 2 mins");
+        }, 62, TimeUnit.SECONDS);
 
         exe.schedule(() -> {
-            System.out.println("2");
-            long start = System.nanoTime();
-            Player.getCoins2(userID);
-            long end = System.nanoTime();
-            System.out.println(end-start);
-            System.out.println();
-            Data.clearCache();
-        }, 8, TimeUnit.SECONDS);
+            System.out.println("\nsecond op");
+            checkCoins(userID);
+        }, 62*2, TimeUnit.SECONDS);
 
         exe.schedule(() -> {
-            System.out.println("1");
-            long start = System.nanoTime();
-            Player.getCoins(userID);
-            long end = System.nanoTime();
-            System.out.println(end-start);
-            System.out.println();
-            Data.clearCache();
-        }, 12, TimeUnit.SECONDS);
+            System.out.println("\nthird op, 2 mins passed");
+            checkCoins(userID);
+        }, 62*3, TimeUnit.SECONDS);
 
         exe.schedule(() -> {
-            System.out.println("2");
-            long start = System.nanoTime();
-            Player.getCoins2(userID);
-            long end = System.nanoTime();
-            System.out.println(end-start);
-            System.out.println();
-            Data.clearCache();
-        }, 16, TimeUnit.SECONDS);
-
-        exe.schedule(() -> {
-            System.out.println("1");
-            long start = System.nanoTime();
-            Player.getCoins(userID);
-            long end = System.nanoTime();
-            System.out.println(end-start);
-            System.out.println();
-            Data.clearCache();
-        }, 20, TimeUnit.SECONDS);
-
-        exe.schedule(() -> {
-            System.out.println("2");
-            long start = System.nanoTime();
-            Player.getCoins2(userID);
-            long end = System.nanoTime();
-            System.out.println(end-start);
-            System.out.println();
-            Data.clearCache();
-        }, 24, TimeUnit.SECONDS);
-
-        exe.schedule(() -> {
-            System.out.println("1");
-            long start = System.nanoTime();
-            Player.getCoins(userID);
-            long end = System.nanoTime();
-            System.out.println(end-start);
-            System.out.println();
-            Data.clearCache();
-        }, 28, TimeUnit.SECONDS);
-
-        exe.schedule(() -> {
-            System.out.println("2");
-            long start = System.nanoTime();
-            Player.getCoins2(userID);
-            long end = System.nanoTime();
-            System.out.println(end-start);
-            System.out.println();
-            Data.clearCache();
-        }, 32, TimeUnit.SECONDS);
-
-        // exe.schedule(() -> {
-        //     System.out.println("\nfirst op");
-        //     checkCoins(userID);
-        //     Player.setCoinBonusMultiplier(userID, 2, (short) 2);
-        //     System.out.println("bonus set for 2 mins");
-        // }, 62, TimeUnit.SECONDS);
-
-        // exe.schedule(() -> {
-        //     System.out.println("\nsecond op");
-        //     checkCoins(userID);
-        // }, 62*2, TimeUnit.SECONDS);
-
-        // exe.schedule(() -> {
-        //     System.out.println("\nthird op, 2 mins passed");
-        //     checkCoins(userID);
-        // }, 62*3, TimeUnit.SECONDS);
-
-        // exe.schedule(() -> {
-        //     System.out.println("\nfourth op, 3 mins passed");
-        //     checkCoins(userID);
-        // }, 62*4, TimeUnit.SECONDS);
+            System.out.println("\nfourth op, 3 mins passed");
+            checkCoins(userID);
+        }, 62*4, TimeUnit.SECONDS);
 
         // long userID = 263049275196309506L;
         // System.out.println(Player.getCoins(userID));

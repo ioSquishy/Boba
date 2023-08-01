@@ -11,48 +11,33 @@ public class Player {
     //coins
     public static int getCoins(long userID) {
         Document doc = Data.getUserDoc(userID);
-        // int coins = doc.get("coins", 0);
-        // int coinsPerMinute = doc.get("coinsPerMinute", 0);
-        // long currentMinute = Instant.now().getEpochSecond()/60;
-        // long lastCoinUpdate = doc.get("lastCoinUpdate", currentMinute);
-        // doc.put("lastCoinUpdate", currentMinute);
-        // long timeElapsedFromLastCoinUpdate = currentMinute-lastCoinUpdate;
-        // int bonusMultiplier = doc.get("coinBonusMultiplier", 1);
-        // if (bonusMultiplier > 1) {
-        //     long bonusEndMinute = doc.get("coinBonusEnd", 0L);
-        //     long bonusTimeLeft = bonusEndMinute - currentMinute;
-        //     if (bonusTimeLeft >= 0) { //still time left before bonus ends
-        //         coins += timeElapsedFromLastCoinUpdate*(coinsPerMinute*bonusMultiplier);
-        //         doc.put("coins", coins);
-        //         return coins;
-        //     } else { //bonus has ended
-        //         long bonusTimeElapsed = bonusEndMinute-lastCoinUpdate;
-        //         long remainingCoinsToAdd = Math.abs(bonusTimeLeft)*coinsPerMinute;
-        //         coins += (bonusTimeElapsed*(coinsPerMinute*bonusMultiplier)) + remainingCoinsToAdd;
-        //         doc.put("coinBonusMultiplier", 1);
-        //         doc.put("coins", coins);
-        //         return coins;
-        //     }
-        // } else {
-        //     coins += timeElapsedFromLastCoinUpdate*coinsPerMinute;
-        //     doc.put("coins", coins);
-        //     return coins;
-        // }
-        
-        return doc.get("coinBonusMultiplier", 1) > 1 
-            ? (doc.get("coinBonusEnd", 0)-(Instant.now().getEpochSecond()/60)) >= 0 
-            ? updateCoinsAndMultiplier(doc, (int) (doc.get("coins", 0)+(((Instant.now().getEpochSecond()/60)-doc.get("lastCoinUpdate", Instant.now().getEpochSecond()/60))*(doc.get("coinsPerMinute", 0)*doc.get("coinBonusMultiplier", 1)))), false)
-            : updateCoinsAndMultiplier(doc, (int) (doc.get("coins", 0)+((doc.get("coinBonusEnd", 0L)-doc.get("lastCoinUpdate", Instant.now().getEpochSecond()/60))*(doc.get("coinsPerMinute", 0)*doc.get("coinBonusMultiplier", 1)))+(Math.abs(doc.get("coinBonusEnd", 0L)-Instant.now().getEpochSecond()/60)*doc.get("coinsPerMinute", 0))), true)
-            : updateCoinsAndMultiplier(doc, (int) (doc.get("coins", 0)+(Instant.now().getEpochSecond()/60-doc.get("lastCoinUpdate", Instant.now().getEpochSecond()/60))*doc.get("coinsPerMinute", 0)), false);
-    }
-    //helper method
-    private static int updateCoinsAndMultiplier(Document doc, int coins, boolean resetBonusMultiplier) {
-        doc.put("lastCoinUpdate", Instant.now().getEpochSecond()/60);
-        doc.put("coins", coins);
-        if (resetBonusMultiplier) {
-            doc.put("coinBonusMultiplier", 1);
+        int coins = doc.get("coins", 0);
+        int coinsPerMinute = doc.get("coinsPerMinute", 0);
+        long currentMinute = Instant.now().getEpochSecond()/60;
+        long lastCoinUpdate = doc.get("lastCoinUpdate", currentMinute);
+        doc.put("lastCoinUpdate", currentMinute);
+        long timeElapsedFromLastCoinUpdate = currentMinute-lastCoinUpdate;
+        int bonusMultiplier = doc.get("coinBonusMultiplier", 1);
+        if (bonusMultiplier > 1) { //calculate addition of bonus if they have/had a bonus
+            long bonusEndMinute = doc.get("coinBonusEnd", 0L);
+            long bonusTimeLeft = bonusEndMinute - currentMinute;
+            if (bonusTimeLeft >= 0) { //if still time left before bonus ends
+                coins += timeElapsedFromLastCoinUpdate*(coinsPerMinute*bonusMultiplier);
+                doc.put("coins", coins);
+                return coins;
+            } else { //bonus has ended so calculate how much of the bonus coins to give and add the remaining at normal
+                long bonusTimeElapsed = bonusEndMinute-lastCoinUpdate;
+                long remainingCoinsToAdd = Math.abs(bonusTimeLeft)*coinsPerMinute;
+                coins += (bonusTimeElapsed*(coinsPerMinute*bonusMultiplier)) + remainingCoinsToAdd;
+                doc.put("coinBonusMultiplier", 1);
+                doc.put("coins", coins);
+                return coins;
+            }
+        } else {
+            coins += timeElapsedFromLastCoinUpdate*coinsPerMinute;
+            doc.put("coins", coins);
+            return coins;
         }
-        return coins;
     }
     /**
      * 
