@@ -6,6 +6,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.bson.Document;
+import org.javacord.api.entity.channel.TextChannel;
 
 public class Player {
     //coins
@@ -69,6 +70,7 @@ public class Player {
     /**
      * 
      * @param userID
+     * @param textChannel gets sent new images if current urls dont work
      * @return String[a][b]
      * <p>a: 0 = boba names
      * <p>a: 1 = boba image urls
@@ -76,13 +78,13 @@ public class Player {
      * 
      * <p>b iterates through the bobas themselves
      */
-    public static String[][] getBobas(long userID) {
+    public static String[][] getBobas(long userID, TextChannel textChannel) {
         Document doc = Data.getUserDoc(userID);
-        return getBobaArray(doc);
+        return getBobaNamesAndImages(doc);
     }
     public static void reorderBobas(long userID, byte[] reorderedOldIndicies) {
         Document doc = Data.getUserDoc(userID);
-        String[][] ogBobas = getBobaArray(doc);
+        String[][] ogBobas = getFullBobaArray(doc);
         byte totalBobas = (byte) ogBobas[0].length;
         String[] newBobaNames = new String[totalBobas];
         String[] newBobaImages = new String[totalBobas];
@@ -98,7 +100,7 @@ public class Player {
     }
     public static void addBoba(long userID, String bobaName, String bobaImage, String bobaElements) {
         Document doc = Data.getUserDoc(userID);
-        List<List<String>> ogBobas = getBobaList(doc);
+        List<List<String>> ogBobas = getBobaFullList(doc);
         ogBobas.get(0).add(bobaName);
         ogBobas.get(1).add(bobaImage);
         ogBobas.get(2).add(bobaElements);
@@ -106,7 +108,7 @@ public class Player {
     }
     public static void removeBoba(long userID, byte indexOfBoba) {
         Document doc = Data.getUserDoc(userID);
-        List<List<String>> ogBobas = getBobaList(doc);
+        List<List<String>> ogBobas = getBobaFullList(doc);
         ogBobas.get(0).remove(indexOfBoba);
         ogBobas.get(1).remove(indexOfBoba);
         ogBobas.get(2).remove(indexOfBoba);
@@ -119,18 +121,23 @@ public class Player {
         doc.put("bobaNames", bobaNames);
     }
     //boba helper methods
-    private static List<List<String>> getBobaList(Document doc) {
+    private static List<List<String>> getBobaFullList(Document doc) {
         List<List<String>> boba =  new ArrayList<>();
         boba.add(doc.get("bobaNames", new ArrayList<String>()));
         boba.add(doc.get("bobaImages", new ArrayList<String>()));
         boba.add(doc.get("bobaElements", new ArrayList<String>()));
         return boba;
     }
-    private static String[][] getBobaArray(Document doc) {
+    private static String[][] getFullBobaArray(Document doc) {
         String[] bobaNames = (String[]) doc.get("bobaNames");
         String[] bobaImages = (String[]) doc.get("bobaImages");
         String[] bobaElements = (String[]) doc.get("bobaElements");
         return new String[][] {bobaNames, bobaImages, bobaElements};
+    }
+    private static String[][] getBobaNamesAndImages(Document doc) {
+        String[] bobaNames = (String[]) doc.get("bobaNames");
+        String[] bobaImages = (String[]) doc.get("bobaImages");
+        return new String[][] {bobaNames, bobaImages};
     }
     private static void updateBobasViaList(Document doc, List<List<String>> bobas) {
         doc.put("bobaNames", bobas.get(0));

@@ -22,64 +22,31 @@ import iosquishy.ImageGen.MenuCompiler;
 import iosquishy.ImageGen.BobaGod.CupStyle;
 import iosquishy.ImageGen.BobaGod.Tea;
 import iosquishy.ImageGen.BobaGod.Topping;
-import iosquishy.ImageGen.MenuCompiler.Menu;
+import iosquishy.ImageGen.MenuCompiler.MenuTheme;
 
 class Test {
     private static ScheduledExecutorService exe = Executors.newSingleThreadScheduledExecutor();
     public static void main(String[] args) {
         // BufferedImage img = ImgEditor.getImageFromURL("https://cdn.discordapp.com/attachments/818275525797609472/1132459889692770416/image.png");
         
-        Data.initMongoDB();
+        // Data.initMongoDB();
 
-        long userID = 263049275196309506L;
-        System.out.println(Player.getCoins(userID));
-        Player.setCoinsPerMinute(userID, 10);
+        BobaGod.initBobaMaps();
 
-        exe.schedule(() -> {
-            System.out.println("\nfirst op");
-            checkCoins(userID);
-            Player.setCoinBonusMultiplier(userID, 2, (short) 2);
-            System.out.println("bonus set for 2 mins");
-        }, 62, TimeUnit.SECONDS);
+        BobaGod boba = new BobaGod();
+        boba.setCupStyle(CupStyle.SEALED_CUP);
+        boba.setTea(Tea.MILK_TEA);
+        boba.addTopping(Topping.PEARL);
+        BufferedImage singleBoba = boba.getBoba();
 
-        exe.schedule(() -> {
-            System.out.println("\nsecond op");
-            checkCoins(userID);
-        }, 62*2, TimeUnit.SECONDS);
+        Image[] testImages = new Image[] {singleBoba, singleBoba, singleBoba, singleBoba, singleBoba, singleBoba, singleBoba, singleBoba, singleBoba, singleBoba, singleBoba, singleBoba};
 
-        exe.schedule(() -> {
-            System.out.println("\nthird op, 2 mins passed");
-            checkCoins(userID);
-        }, 62*3, TimeUnit.SECONDS);
-
-        exe.schedule(() -> {
-            System.out.println("\nfourth op, 3 mins passed");
-            checkCoins(userID);
-        }, 62*4, TimeUnit.SECONDS);
-
-        // long userID = 263049275196309506L;
-        // System.out.println(Player.getCoins(userID));
-        // Player.addCoins(userID, (short) 2);
-        // System.out.println(Player.getCoins(userID));
-
-
-
-        // BobaGod.initBobaMaps();
-
-        // BobaGod boba = new BobaGod();
-        // boba.setCupStyle(CupStyle.SEALED_CUP);
-        // boba.setTea(Tea.MILK_TEA);
-        // boba.addTopping(Topping.PEARL);
-        // BufferedImage singleBoba = boba.getBoba();
-
-        // Image[] testImages = new Image[] {singleBoba, singleBoba, singleBoba, singleBoba, singleBoba, singleBoba, singleBoba, singleBoba, singleBoba, singleBoba, singleBoba, singleBoba};
-
-        // File outputfile = new File("output.png");
-        // try {
-        //     ImageIO.write(img, "png", outputfile);
-        // } catch (IOException e) {
-        //     e.printStackTrace();
-        // }
+        File outputfile = new File("output.png");
+        try {
+            ImageIO.write(MenuCompiler.compileMenu("squishy boba", MenuTheme.EMPTY, testImages), "png", outputfile);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     static void checkCoins(long userID) {

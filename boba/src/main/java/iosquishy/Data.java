@@ -132,7 +132,9 @@ public class Data implements Serializable {
             .append("bobaNames", Collections.EMPTY_LIST)
             .append("bobaImages", Collections.EMPTY_LIST)
             .append("bobaElements", Collections.EMPTY_LIST)
-            .append("menuTheme", "null");
+            .append("menuTheme", "EMPTY")
+            .append("menuURL", "")
+            .append("cafeName", "Your Cafe");
     }
     private static void addDocToCache(Long userID, Document document) {
         userCache.put(userID, document);
