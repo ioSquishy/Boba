@@ -115,16 +115,16 @@ public class BobaGod {
         return (Topping[]) toppings.toArray();
     }
     public String getBobaElements() {
-        String toppings = "";
-        this.toppings.forEach(topping -> {
-            toppings += topping.toString() + " "
-        });
-        return tea.toString() + " " + toppings + cup.toString();
+        String toppingElements = "";
+        for (int topping = 0; topping < toppings.size(); topping++) {
+            toppingElements += toppings.get(topping).toString() + " ";
+        }
+        return tea.toString() + " " + toppingElements + cup.toString();
     }
 
     //create boba from elements
     public static BufferedImage recompileBoba(String bobaElements) {
-        String[] elements = bobaElements.split(' ');
+        String[] elements = bobaElements.split(" ");
         ImgEditor boba = new ImgEditor(512, 512);
         for (String element : elements) {
             //convert string to enum and add img to boba

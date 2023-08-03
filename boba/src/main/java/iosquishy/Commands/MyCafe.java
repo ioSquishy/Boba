@@ -8,7 +8,7 @@ public class MyCafe {
         return new SlashCommandBuilder()
             .setName("mycafe")
             .setDescription("See your cafe's menu and stats.")
-            .setEnabledInDMs(false);
+            .setEnabledInDms(false);
     }
 
     public static void runCommand(SlashCommandInteraction interaction) {
