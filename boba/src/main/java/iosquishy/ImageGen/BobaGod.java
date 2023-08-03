@@ -103,13 +103,7 @@ public class BobaGod {
             }
             this.boba.setLayer("cup", cupImage.get(cup));
         }
-        BufferedImage preMetaImage = boba.getEditedImage();
-        return preMetaImage;
-        // HashMap<String, String> metadata = new HashMap<>();
-        // metadata.put("cupStyle", cup.toString());
-        // metadata.put("tea", tea.toString());
-        // metadata.put("toppings", toppings.toString());
-        // return ImgEditor.infuseMetadata(preMetaImage, metadata);
+        return boba.getEditedImage();
     }
     public CupStyle getCupStyle() {
         return cup;
@@ -119,5 +113,22 @@ public class BobaGod {
     }
     public Topping[] getToppings() {
         return (Topping[]) toppings.toArray();
+    }
+    public String getBobaElements() {
+        String toppings = "";
+        this.toppings.forEach(topping -> {
+            toppings += topping.toString() + " "
+        });
+        return tea.toString() + " " + toppings + cup.toString();
+    }
+
+    //create boba from elements
+    public static BufferedImage recompileBoba(String bobaElements) {
+        String[] elements = bobaElements.split(' ');
+        ImgEditor boba = new ImgEditor(512, 512);
+        for (String element : elements) {
+            //convert string to enum and add img to boba
+        }
+        return boba.getEditedImage();
     }
 }

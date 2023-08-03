@@ -80,6 +80,12 @@ public class Player {
      */
     public static String[][] getBobas(long userID, TextChannel textChannel) {
         Document doc = Data.getUserDoc(userID);
+        String[][] bobaNamesAndImages = getBobaNamesAndImages(doc);
+        if (ImgEditor.getImageFromURL(bobaNamesAndImages[1][0]) != null) {
+            return bobaNamesAndImages;
+        } else {
+
+        }
         return getBobaNamesAndImages(doc);
     }
     public static void reorderBobas(long userID, byte[] reorderedOldIndicies) {
@@ -139,10 +145,34 @@ public class Player {
         String[] bobaImages = (String[]) doc.get("bobaImages");
         return new String[][] {bobaNames, bobaImages};
     }
+    private static String[] getBobaElements(Document doc) {
+        return (Stringp[]) doc.get("bobaElements");
+    }
     private static void updateBobasViaList(Document doc, List<List<String>> bobas) {
         doc.put("bobaNames", bobas.get(0));
         doc.put("bobaImages", bobas.get(1));
         doc.put("bobaElements", bobas.get(2));
+    }
+    /**
+     * 
+     * @param bobaImagesAndElements [0] is images<br>[1] is elements
+     * @param channel to send message of new images to
+     */
+    private static boolean recompileBobas(String[][] bobaImagesAndElements, TextChannel channel) {
+        MessageBuilder msgBuilder1 = null;
+        MessageBuilder msgBuilder2 = null;
+        boolean splitMsg = false;
+        if (bobaImagesAndElements.length > 10) {
+            splitMsg = true;
+            //split the images between msgbuilder 1 and 2
+        }
+        for (int bobaImage = 0; bobaImage < bobaImagesAndElements.length; bobaImage++) {
+            BufferedImage newBobaImg = BobaGod.recompileBoba(bobaImagesAndElements[1][bobaImage]);
+            //add image to msgBuilder1
+            if (splitMsg && bobaImages > 6) {
+                //add image to msgBuilder2
+            }
+        }
     }
 
     //menu theme
