@@ -4,9 +4,14 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.awt.image.BufferedImage;
 
 import org.bson.Document;
 import org.javacord.api.entity.channel.TextChannel;
+import org.javacord.api.entity.message.MessageBuilder;
+
+import iosquishy.ImageGen.BobaGod;
+import iosquishy.ImageGen.ImgEditor;
 
 public class Player {
     //coins
@@ -146,7 +151,7 @@ public class Player {
         return new String[][] {bobaNames, bobaImages};
     }
     private static String[] getBobaElements(Document doc) {
-        return (Stringp[]) doc.get("bobaElements");
+        return (String[]) doc.get("bobaElements");
     }
     private static void updateBobasViaList(Document doc, List<List<String>> bobas) {
         doc.put("bobaNames", bobas.get(0));
@@ -169,10 +174,11 @@ public class Player {
         for (int bobaImage = 0; bobaImage < bobaImagesAndElements.length; bobaImage++) {
             BufferedImage newBobaImg = BobaGod.recompileBoba(bobaImagesAndElements[1][bobaImage]);
             //add image to msgBuilder1
-            if (splitMsg && bobaImages > 6) {
+            if (splitMsg && bobaImage > 6) {
                 //add image to msgBuilder2
             }
         }
+        return false;
     }
 
     //menu theme
