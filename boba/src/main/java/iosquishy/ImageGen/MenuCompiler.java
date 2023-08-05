@@ -23,12 +23,12 @@ public class MenuCompiler {
     private static final short menuHeaderHeight = 400;
     private static final short bobaDimensions = 512;
     private static final byte bobaLeftMargin = 100;
+    private static final byte bobaNameLeftMargin = 50;
     private static final byte maxHorizontalBobas = 3;
     private static final short horizontalMenuDiv = menuImgWidth/maxHorizontalBobas;
     private static final byte maxVerticalBobas = 4;
     private static final short verticalMenuDiv = (menuImgHeight-menuHeaderHeight) / maxVerticalBobas;
     private static final short bobaVerticalCenteredOffset = bobaDimensions + ((verticalMenuDiv-bobaDimensions) / 2);
-    private static final short TextDistanceX = (menuImgWidth/maxHorizontalBobas) - ((menuImgWidth/maxHorizontalBobas) - (bobaDimensions+bobaLeftMargin));
     private static final byte titlePadding = 100;
     private static final short titleFontSize = menuHeaderHeight-titlePadding;
     private static final short titleVerticalCenterOffset = titleFontSize + (titlePadding/2);
@@ -55,14 +55,13 @@ public class MenuCompiler {
                     int currentBobaY = menuHeaderHeight + (bobaImgY*verticalMenuDiv - bobaVerticalCenteredOffset);
                     compiledMenu.setLayer(""+currentBoba, bobas[currentBoba], currentBobaX, currentBobaY);
                     //Add boba names
-                    int currentBobaNameX = 0;
-                    int currentBobaNameY = 0;
+                    int currentBobaNameX = currentBobaX + menuImgWidth + bobaNameLeftMargin;
                     BufferedImage bobaNameImg = new BufferedImage(horizontalMenuDiv, verticalMenuDiv, BufferedImage.TYPE_INT_ARGB);
                     Graphics2D bobaNameText = bobaNameImg.createGraphics();
                     bobaNameText.setFont(new Font("Arial", Font.PLAIN, verticalMenuDiv/2));
                     bobaNameText.drawString(cafeName, textCenteredDisplacement, titleVerticalCenterOffset);
                     bobaNameText.dispose();
-                    compiledMenu.setLayer(""+currentBoba+"Name", bobaNameImg, textCenteredDisplacement, bobaImgY);
+                    compiledMenu.setLayer(""+currentBoba+"Name", bobaNameImg, currentBobaNameX, currentBobaY);
                     currentBoba++;
                 } else {
                     break;

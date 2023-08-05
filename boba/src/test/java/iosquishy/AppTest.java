@@ -26,31 +26,34 @@ import iosquishy.ImageGen.MenuCompiler.MenuTheme;
 
 class Test {
     private static ScheduledExecutorService exe = Executors.newSingleThreadScheduledExecutor();
+
+    private static enum TestEnum {
+        A, B, C
+    }
     public static void main(String[] args) {
         // BufferedImage img = ImgEditor.getImageFromURL("https://cdn.discordapp.com/attachments/818275525797609472/1132459889692770416/image.png");
         
+        System.out.println(TestEnum.B.ordinal());
+        TestEnum t = TestEnum.valueOf("F");
+        System.out.println(t.ordinal());
         // Data.initMongoDB();
 
-        BobaGod.initBobaMaps();
+        // BobaGod.initBobaMaps();
 
-        BobaGod boba = new BobaGod();
-        boba.setCupStyle(CupStyle.SEALED_CUP);
-        boba.setTea(Tea.MILK_TEA);
-        boba.addTopping(Topping.PEARL);
-        BufferedImage singleBoba = boba.getBoba();
+        // BobaGod boba = new BobaGod();
+        // boba.setCupStyle(CupStyle.SEALED_CUP);
+        // boba.setTea(Tea.MILK_TEA);
+        // boba.addTopping(Topping.PEARL);
+        // BufferedImage singleBoba = boba.getBoba();
 
-        Image[] testImages = new Image[] {singleBoba, singleBoba, singleBoba, singleBoba, singleBoba, singleBoba, singleBoba, singleBoba, singleBoba, singleBoba, singleBoba, singleBoba};
+        // Image[] testImages = new Image[] {singleBoba, singleBoba, singleBoba, singleBoba, singleBoba, singleBoba, singleBoba, singleBoba, singleBoba, singleBoba, singleBoba, singleBoba};
 
-        File outputfile = new File("output.png");
-        try {
-            ImageIO.write(MenuCompiler.compileMenu("squishy boba", MenuTheme.EMPTY, testImages), "png", outputfile);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    static void checkCoins(long userID) {
-        System.out.println("coins " + Player.getCoins(userID));
+        // File outputfile = new File("output.png");
+        // try {
+        //     ImageIO.write(MenuCompiler.compileMenu("squishy boba", MenuTheme.EMPTY, testImages), "png", outputfile);
+        // } catch (IOException e) {
+        //     e.printStackTrace();
+        // }
     }
 
 }

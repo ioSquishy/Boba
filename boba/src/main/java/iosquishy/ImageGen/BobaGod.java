@@ -126,9 +126,12 @@ public class BobaGod {
     public static BufferedImage recompileBoba(String bobaElements) {
         String[] elements = bobaElements.split(" ");
         ImgEditor boba = new ImgEditor(512, 512);
-        for (String element : elements) {
-            //convert string to enum and add img to boba
+        CupStyle cupStyle = CupStyle.valueOf(elements[elements.length]);
+        boba.setLayer("tea", ImgEditor.recolorImage(teaImage.get(cupStyle), teaColor.get(Tea.valueOf(elements[0]))), 0, 0);
+        for (byte element = 1; element < elements.length-1; element++) {
+            boba.setLayer("topping-"+element, toppingStyle.get(cupStyle).get(Topping.valueOf(elements[element])), 0, 0);
         }
+        boba.setLayer("cup", cupImage.get(cupStyle), 0, 0);
         return boba.getEditedImage();
     }
 }
