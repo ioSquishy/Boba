@@ -23,7 +23,6 @@ public class MenuCompiler {
     private static final short menuHeaderHeight = 400;
     private static final short bobaDimensions = 512;
     private static final byte bobaLeftMargin = 100;
-    private static final byte bobaNameLeftMargin = 50;
     private static final byte maxHorizontalBobas = 3;
     private static final short horizontalMenuDiv = menuImgWidth/maxHorizontalBobas;
     private static final byte maxVerticalBobas = 4;
@@ -32,19 +31,21 @@ public class MenuCompiler {
     private static final byte titlePadding = 100;
     private static final short titleFontSize = menuHeaderHeight-titlePadding;
     private static final short titleVerticalCenterOffset = titleFontSize + (titlePadding/2);
-    public static BufferedImage compileMenu(String cafeName, MenuTheme menuTheme, Image[] bobas) {
+    private static final Font titleFont = new Font("Arial", Font.PLAIN, titleFontSize);
+    private static final Font nameFont = new Font("Arial", Font.PLAIN, verticalMenuDiv/4);
+    public static BufferedImage compileMenu(String cafeName, MenuTheme menuTheme, Image[] bobas, String[] bobaNames) {
         //Create ImgStacker
         ImgEditor compiledMenu = new ImgEditor(menuImgWidth, menuImgHeight);
         //Add menu backdrop
         compiledMenu.setLayer("backdrop", menuImage.get(menuTheme));
-        //Add cafe name
-        BufferedImage cafeTitleImg = new BufferedImage(menuImgWidth, menuHeaderHeight, BufferedImage.TYPE_INT_ARGB);
-        Graphics2D cafeTitleText = cafeTitleImg.createGraphics();
-        cafeTitleText.setFont(new Font("Arial", Font.PLAIN, titleFontSize));
-        int textCenteredDisplacement = ((menuImgWidth - cafeTitleText.getFontMetrics().stringWidth(cafeName)) / 2);
-        cafeTitleText.drawString(cafeName, textCenteredDisplacement, titleVerticalCenterOffset);
-        cafeTitleText.dispose();
-        compiledMenu.setLayer("cafeName", cafeTitleImg);
+        //Create text buffered image
+        BufferedImage textImg = new BufferedImage(menuImgWidth, menuImgHeight, BufferedImage.TYPE_INT_ARGB);
+        Graphics2D text = textImg.createGraphics();
+        //add cafe name text
+        text.setFont(titleFont);
+        text.drawString(cafeName, ((menuImgWidth - text.getFontMetrics().stringWidth(cafeName)) / 2), titleVerticalCenterOffset);
+        //Change boba name
+        text.setFont(nameFont);
         //Add boba
         byte currentBoba = 0;
         for (byte bobaImgX = 0; bobaImgX < maxHorizontalBobas; bobaImgX++)  {
@@ -54,20 +55,40 @@ public class MenuCompiler {
                     int currentBobaX = (bobaImgX*horizontalMenuDiv) + bobaLeftMargin;
                     int currentBobaY = menuHeaderHeight + (bobaImgY*verticalMenuDiv - bobaVerticalCenteredOffset);
                     compiledMenu.setLayer(""+currentBoba, bobas[currentBoba], currentBobaX, currentBobaY);
-                    //Add boba names
-                    int currentBobaNameX = currentBobaX + menuImgWidth + bobaNameLeftMargin;
-                    BufferedImage bobaNameImg = new BufferedImage(horizontalMenuDiv, verticalMenuDiv, BufferedImage.TYPE_INT_ARGB);
-                    Graphics2D bobaNameText = bobaNameImg.createGraphics();
-                    bobaNameText.setFont(new Font("Arial", Font.PLAIN, verticalMenuDiv/2));
-                    bobaNameText.drawString(cafeName, textCenteredDisplacement, titleVerticalCenterOffset);
-                    bobaNameText.dispose();
-                    compiledMenu.setLayer(""+currentBoba+"Name", bobaNameImg, currentBobaNameX, currentBobaY);
+                    //add boba names
+                    if (bobaDimensions+text.getFontMetrics().stringWidth(bobaNames[currentBoba]) > horizontalMenuDiv) {
+                        System.out.println("occupancy:  " + bobaDimensions+text.getFontMetrics().stringWidth(bobaNames[currentBoba]) + " | hmd: " + horizontalMenuDiv);
+                        String[] splitWords = bobaNames[currentBoba].split(" ");
+                        System.out.println("length: " + splitWords.length);
+                        int fontHeight = text.getFontMetrics().getHeight();
+                        //first try splitting name name in half
+                        if (splitWords.length >= 1) {
+                            short topXlength = 0;
+                            short bottomXlength = 0;
+                            for (short word = 0; word < splitWords.length; word++) {
+                                System.out.println("word: " + word);
+                                if (word+1 > splitWords.length/2) {
+                                    //top word
+                                    text.drawString(splitWords[word] +" ", currentBobaX+bobaDimensions+topXlength, currentBobaY+menuHeaderHeight+(fontHeight/2));
+                                    topXlength += text.getFontMetrics().stringWidth(splitWords[word] + " ");
+                                } else {
+                                    //bottom word
+                                    text.drawString(splitWords[word]+" ", currentBobaX+bobaDimensions+bottomXlength, currentBobaY+menuHeaderHeight-(fontHeight/2));
+                                    bottomXlength += text.getFontMetrics().stringWidth(splitWords[word] + " ");
+                                }
+                            }
+                        }
+                    } else {
+                        text.drawString(bobaNames[currentBoba], currentBobaX+bobaDimensions, currentBobaY+menuHeaderHeight);
+                    }
                     currentBoba++;
                 } else {
                     break;
                 }
             }
         }
+        text.dispose();
+        compiledMenu.setLayer("text", textImg, 0, 0);
         //Return
         return compiledMenu.getEditedImage();
     }

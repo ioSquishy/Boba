@@ -33,27 +33,25 @@ class Test {
     public static void main(String[] args) {
         // BufferedImage img = ImgEditor.getImageFromURL("https://cdn.discordapp.com/attachments/818275525797609472/1132459889692770416/image.png");
         
-        System.out.println(TestEnum.B.ordinal());
-        TestEnum t = TestEnum.valueOf("F");
-        System.out.println(t.ordinal());
         // Data.initMongoDB();
 
-        // BobaGod.initBobaMaps();
+        BobaGod.initBobaMaps();
 
-        // BobaGod boba = new BobaGod();
-        // boba.setCupStyle(CupStyle.SEALED_CUP);
-        // boba.setTea(Tea.MILK_TEA);
-        // boba.addTopping(Topping.PEARL);
-        // BufferedImage singleBoba = boba.getBoba();
+        BobaGod boba = new BobaGod();
+        boba.setCupStyle(CupStyle.SEALED_CUP);
+        boba.setTea(Tea.MILK_TEA);
+        boba.addTopping(Topping.PEARL);
+        BufferedImage singleBoba = boba.getBoba();
 
-        // Image[] testImages = new Image[] {singleBoba, singleBoba, singleBoba, singleBoba, singleBoba, singleBoba, singleBoba, singleBoba, singleBoba, singleBoba, singleBoba, singleBoba};
+        Image[] testImages = new Image[] {singleBoba, singleBoba, singleBoba, singleBoba, singleBoba, singleBoba, singleBoba, singleBoba, singleBoba, singleBoba, singleBoba, singleBoba};
+        String[] testNames = new String[] {"1234567890", "12345678901234567890", "Matcha Green Tea", "Mango Oolong Tea w/ Lychee Jelly", "Strawberry Black Tea w/ Lychee Jelly", "test name", "test name", "testname", "test name", "test name", "test name", "testname"};
 
-        // File outputfile = new File("output.png");
-        // try {
-        //     ImageIO.write(MenuCompiler.compileMenu("squishy boba", MenuTheme.EMPTY, testImages), "png", outputfile);
-        // } catch (IOException e) {
-        //     e.printStackTrace();
-        // }
+        File outputfile = new File("output.png");
+        try {
+            ImageIO.write(MenuCompiler.compileMenu("test cafe", MenuTheme.EMPTY, testImages, testNames), "png", outputfile);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
 }
