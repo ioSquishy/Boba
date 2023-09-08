@@ -44,7 +44,7 @@ class Test {
         BufferedImage singleBoba = boba.getBoba();
 
         Image[] testImages = new Image[] {singleBoba, singleBoba, singleBoba, singleBoba, singleBoba, singleBoba, singleBoba, singleBoba, singleBoba, singleBoba, singleBoba, singleBoba};
-        String[] testNames = new String[] {"1234567890", "12345678901234567890", "Matcha Green Tea", "Mango Oolong Tea w/ Lychee Jelly", "Strawberry Black Tea w/ Lychee Jelly", "test name", "test name", "testname", "test name", "test name", "test name", "testname"};
+        String[] testNames = new String[] {"1234567890", "12345678901234567890", "Matcha Green Tea", "Mango Oolong Tea w/ Lychee Jellyyyyyyyyyyyyyyyyyy", "Strawberry Black Tea w/ Lychee Jelly", "test name", "test name", "testname", "test name", "test name", "test name", "testname"};
 
         File outputfile = new File("output.png");
         try {

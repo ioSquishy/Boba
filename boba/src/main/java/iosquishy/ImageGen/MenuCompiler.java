@@ -4,7 +4,11 @@ import java.awt.Font;
 import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.image.BufferedImage;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 
 public class MenuCompiler {
     public static enum MenuTheme {
@@ -32,7 +36,8 @@ public class MenuCompiler {
     private static final short titleFontSize = menuHeaderHeight-titlePadding;
     private static final short titleVerticalCenterOffset = titleFontSize + (titlePadding/2);
     private static final Font titleFont = new Font("Arial", Font.PLAIN, titleFontSize);
-    private static final Font nameFont = new Font("Arial", Font.PLAIN, verticalMenuDiv/4);
+    private static final short initNameFontSize = verticalMenuDiv/4;
+    private static final Font nameFont = new Font("Arial", Font.PLAIN, initNameFontSize);
     public static BufferedImage compileMenu(String cafeName, MenuTheme menuTheme, Image[] bobas, String[] bobaNames) {
         //Create ImgStacker
         ImgEditor compiledMenu = new ImgEditor(menuImgWidth, menuImgHeight);
@@ -57,27 +62,40 @@ public class MenuCompiler {
                     compiledMenu.setLayer(""+currentBoba, bobas[currentBoba], currentBobaX, currentBobaY);
                     //add boba names
                     if (bobaDimensions+text.getFontMetrics().stringWidth(bobaNames[currentBoba]) > horizontalMenuDiv) {
-                        System.out.println("occupancy:  " + bobaDimensions+text.getFontMetrics().stringWidth(bobaNames[currentBoba]) + " | hmd: " + horizontalMenuDiv);
                         String[] splitWords = bobaNames[currentBoba].split(" ");
-                        System.out.println("length: " + splitWords.length);
+                        ArrayList<String> topLine = new ArrayList<String>(Arrays.asList(splitWords));
+                        ArrayList<String> bottomLine = new ArrayList<String>();
                         int fontHeight = text.getFontMetrics().getHeight();
-                        //first try splitting name name in half
-                        if (splitWords.length >= 1) {
-                            short topXlength = 0;
-                            short bottomXlength = 0;
-                            for (short word = 0; word < splitWords.length; word++) {
-                                System.out.println("word: " + word);
-                                if (word+1 > splitWords.length/2) {
-                                    //top word
-                                    text.drawString(splitWords[word] +" ", currentBobaX+bobaDimensions+topXlength, currentBobaY+menuHeaderHeight+(fontHeight/2));
-                                    topXlength += text.getFontMetrics().stringWidth(splitWords[word] + " ");
-                                } else {
-                                    //bottom word
-                                    text.drawString(splitWords[word]+" ", currentBobaX+bobaDimensions+bottomXlength, currentBobaY+menuHeaderHeight-(fontHeight/2));
-                                    bottomXlength += text.getFontMetrics().stringWidth(splitWords[word] + " ");
+                        byte maxLoops = 100;
+                        do {
+                            if (bobaDimensions+text.getFontMetrics().stringWidth(compileSentenceFromArray(topLine)) > horizontalMenuDiv) { //if top line is still longer than menudiv
+                                int transWordLength = text.getFontMetrics().stringWidth(topLine.get(topLine.size()-1));
+                                if (text.getFontMetrics().stringWidth(compileSentenceFromArray(bottomLine))+transWordLength <= text.getFontMetrics().stringWidth(compileSentenceFromArray(topLine))) { //check whether adding the word to the bottom line would be more space effecient or not, if so add it to bottom
+                                    bottomLine.add(0, topLine.remove(topLine.size()-1));
+                                } else { //if keeping the word on top is more effecient but the top is still too long, shrink font
+                                    short tryCount = 1;
+                                    while (bobaDimensions+text.getFontMetrics().stringWidth(compileSentenceFromArray(bottomLine)) > horizontalMenuDiv) {
+                                        if (tryCount <= initNameFontSize/3) { //if word is too long even after shrinking font
+                                            String bottom = compileSentenceFromArray(bottomLine);
+                                            while (bobaDimensions+text.getFontMetrics().stringWidth(bottom) > horizontalMenuDiv) {
+                                                bottom = bottom.substring(bottom.length()-5);
+                                            }
+                                            break;
+                                        }
+                                        text.setFont(new Font("Arial", Font.PLAIN, initNameFontSize-tryCount));
+                                        tryCount++;
+                                    }
+                                    text.drawString(compileSentenceFromArray(bottomLine), currentBobaX+bobaDimensions, currentBobaY+menuHeaderHeight+(fontHeight/2)); //bottom word
+                                    text.drawString(compileSentenceFromArray(topLine), currentBobaX+bobaDimensions, currentBobaY+menuHeaderHeight-(fontHeight/2)); //top word
+                                    text.setFont(nameFont);
+                                    break;
                                 }
+                            } else { //top line fits and bottom line fits
+                                text.drawString(compileSentenceFromArray(bottomLine), currentBobaX+bobaDimensions, currentBobaY+menuHeaderHeight+(fontHeight/2)); //bottom word
+                                text.drawString(compileSentenceFromArray(topLine), currentBobaX+bobaDimensions, currentBobaY+menuHeaderHeight-(fontHeight/2)); //top word
+                                break;
                             }
-                        }
+                        } while (maxLoops <= 100);
                     } else {
                         text.drawString(bobaNames[currentBoba], currentBobaX+bobaDimensions, currentBobaY+menuHeaderHeight);
                     }
@@ -91,6 +109,14 @@ public class MenuCompiler {
         compiledMenu.setLayer("text", textImg, 0, 0);
         //Return
         return compiledMenu.getEditedImage();
+    }
+
+    private static String compileSentenceFromArray(ArrayList<String> list) {
+        String sentence = "";
+        for (String word : list) {
+            sentence += word + " ";
+        }
+        return sentence.stripLeading().stripTrailing();
     }
 }
 
