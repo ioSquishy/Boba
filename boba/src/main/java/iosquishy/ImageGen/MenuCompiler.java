@@ -64,45 +64,58 @@ public class MenuCompiler {
                     //add boba name
                     if (bobaDimensions+text.getFontMetrics().stringWidth(bobaNames[currentBoba]) > horizontalMenuDiv) { //if name is longer than horizontal menu div
                         String[] splitWords = bobaNames[currentBoba].split(" ");
-                        ArrayList<String> topLine = new ArrayList<String>(Arrays.asList(splitWords));
-                        ArrayList<String> bottomLine = new ArrayList<String>();
-                        int fontHeight = text.getFontMetrics().getHeight();
-                        byte loops = 0;
-                        boolean nameTooLong = false;
-                        do {
-                            if (bobaDimensions+text.getFontMetrics().stringWidth(compileSentenceFromArray(topLine)) > horizontalMenuDiv) { //if top line is still longer than menudiv
-                                int transWordLength = text.getFontMetrics().stringWidth(topLine.get(topLine.size()-1));
-                                if (text.getFontMetrics().stringWidth(compileSentenceFromArray(bottomLine))+transWordLength <= text.getFontMetrics().stringWidth(compileSentenceFromArray(topLine))) { //check whether adding the word to the bottom line would be more space effecient or not, if so add it to bottom
-                                    bottomLine.add(0, topLine.remove(topLine.size()-1));
-                                } else { //if keeping the word on top is more effecient but the top is still too long, shrink font
-                                    short shrinkCount = 1;
-                                    while (bobaDimensions+text.getFontMetrics().stringWidth(compileSentenceFromArray(bottomLine)) > horizontalMenuDiv && bobaDimensions+text.getFontMetrics().stringWidth(compileSentenceFromArray(topLine)) > horizontalMenuDiv) { //checks both lines to see if they are short enough
-                                        if (shrinkCount >= 150) { //if bottom line is too long even after shrinking font
-                                            text.setFont(new Font("Arial", Font.PLAIN, initNameFontSize-(initNameFontSize/3)));
-                                            text.drawString("Boba name is too long...", currentBobaX+bobaDimensions, currentBobaY+menuHeaderHeight);
-                                            nameTooLong = true;
-                                            System.out.println("name too long");
-                                            break;
-                                        } else {
-                                            System.out.println("font size: " + (initNameFontSize-shrinkCount));
-                                            text.setFont(new Font("Arial", Font.PLAIN, initNameFontSize-shrinkCount));
-                                            shrinkCount++;
+                        if (splitWords.length > 1) { //if name has more than one word
+                            ArrayList<String> topLine = new ArrayList<String>(Arrays.asList(splitWords));
+                            ArrayList<String> bottomLine = new ArrayList<String>();
+                            byte loops = 0;
+                            boolean nameTooLong = false;
+                            do {
+                                if (bobaDimensions+text.getFontMetrics().stringWidth(compileSentenceFromArray(topLine)) > horizontalMenuDiv) { //if top line is still longer than menudiv
+                                    int transWordLength = text.getFontMetrics().stringWidth(topLine.get(topLine.size()-1));
+                                    if (text.getFontMetrics().stringWidth(compileSentenceFromArray(bottomLine))+transWordLength <= text.getFontMetrics().stringWidth(compileSentenceFromArray(topLine))) { //check whether adding the word to the bottom line would be more space effecient or not, if so add it to bottom
+                                        bottomLine.add(0, topLine.remove(topLine.size()-1));
+                                    } else { //if keeping the word on top is more effecient but the top is still too long, shrink font
+                                        short shrinkCount = 1;
+                                        while (bobaDimensions+text.getFontMetrics().stringWidth(compileSentenceFromArray(bottomLine)) > horizontalMenuDiv || bobaDimensions+text.getFontMetrics().stringWidth(compileSentenceFromArray(topLine)) > horizontalMenuDiv) { //checks both lines to see if they are short enough
+                                            if (initNameFontSize-shrinkCount <= 10) { //if font size is <= 10
+                                                text.setFont(new Font("Arial", Font.PLAIN, initNameFontSize-(initNameFontSize/3)));
+                                                text.drawString("Boba name is too long...", currentBobaX+bobaDimensions, currentBobaY+menuHeaderHeight);
+                                                nameTooLong = true;
+                                                break;
+                                            } else {
+                                                text.setFont(new Font("Arial", Font.PLAIN, initNameFontSize-shrinkCount));
+                                                shrinkCount++;
+                                            }
                                         }
-                                    }
-                                    if (nameTooLong) {
+                                        if (nameTooLong) {
+                                            break;
+                                        }
+                                        text.drawString(compileSentenceFromArray(bottomLine), currentBobaX+bobaDimensions, currentBobaY+menuHeaderHeight+(text.getFontMetrics().getHeight()/2)); //bottom word
+                                        text.drawString(compileSentenceFromArray(topLine), currentBobaX+bobaDimensions, currentBobaY+menuHeaderHeight-(text.getFontMetrics().getHeight()/2)); //top word
+                                        text.setFont(nameFont);
                                         break;
                                     }
-                                    text.drawString(compileSentenceFromArray(bottomLine), currentBobaX+bobaDimensions, currentBobaY+menuHeaderHeight+(fontHeight/2)); //bottom word
-                                    text.drawString(compileSentenceFromArray(topLine), currentBobaX+bobaDimensions, currentBobaY+menuHeaderHeight-(fontHeight/2)); //top word
-                                    text.setFont(nameFont);
+                                } else { //top line fits and bottom line fits
+                                    text.drawString(compileSentenceFromArray(bottomLine), currentBobaX+bobaDimensions, currentBobaY+menuHeaderHeight+(text.getFontMetrics().getHeight()/2)); //bottom word
+                                    text.drawString(compileSentenceFromArray(topLine), currentBobaX+bobaDimensions, currentBobaY+menuHeaderHeight-(text.getFontMetrics().getHeight()/2)); //top word
                                     break;
                                 }
-                            } else { //top line fits and bottom line fits
-                                text.drawString(compileSentenceFromArray(bottomLine), currentBobaX+bobaDimensions, currentBobaY+menuHeaderHeight+(fontHeight/2)); //bottom word
-                                text.drawString(compileSentenceFromArray(topLine), currentBobaX+bobaDimensions, currentBobaY+menuHeaderHeight-(fontHeight/2)); //top word
-                                break;
+                            } while (loops <= maxNameShrinkingLoops);
+                        } else { //if name is too long and only 1 word
+                            short shrinkCount = 1;
+                            while (bobaDimensions+text.getFontMetrics().stringWidth(bobaNames[currentBoba]) > horizontalMenuDiv) { 
+                                if (initNameFontSize-shrinkCount <= 10) { //if font size is <= 10
+                                    text.setFont(new Font("Arial", Font.PLAIN, initNameFontSize-(initNameFontSize/3)));
+                                    text.drawString("Boba name is too long...", currentBobaX+bobaDimensions, currentBobaY+menuHeaderHeight);
+                                    break;
+                                } else {
+                                    text.setFont(new Font("Arial", Font.PLAIN, initNameFontSize-shrinkCount));
+                                    shrinkCount++;
+                                }
                             }
-                        } while (loops <= maxNameShrinkingLoops);
+                            text.drawString(bobaNames[currentBoba], currentBobaX+bobaDimensions, currentBobaY+menuHeaderHeight);
+                            text.setFont(nameFont);
+                        }
                     } else { //if name fits with no modification needed
                         text.drawString(bobaNames[currentBoba], currentBobaX+bobaDimensions, currentBobaY+menuHeaderHeight);
                     }
