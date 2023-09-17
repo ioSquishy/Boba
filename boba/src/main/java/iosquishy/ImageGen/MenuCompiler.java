@@ -6,9 +6,7 @@ import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 
 public class MenuCompiler {
     public static enum MenuTheme {
@@ -88,7 +86,7 @@ public class MenuCompiler {
                                             }
                                         }
                                         if (nameTooLong) {
-                                            break;
+                                            break; //already drew the string if it was too long
                                         }
                                         text.drawString(compileSentenceFromArray(bottomLine), currentBobaX+bobaDimensions, currentBobaY+menuHeaderHeight+(text.getFontMetrics().getHeight()/2)); //bottom word
                                         text.drawString(compileSentenceFromArray(topLine), currentBobaX+bobaDimensions, currentBobaY+menuHeaderHeight-(text.getFontMetrics().getHeight()/2)); //top word

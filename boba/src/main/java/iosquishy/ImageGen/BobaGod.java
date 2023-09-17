@@ -59,10 +59,10 @@ public class BobaGod {
 		toppingStyle.put(CupStyle.SEALED_CUP, sealed_cup_toppingImage);
     }
     
-    //Local Stuff
+    //Local Stuff + Default Styles
     private ImgEditor boba;
-    private CupStyle cup = null;
-    private Tea tea = null;
+    private CupStyle cup = CupStyle.SEALED_CUP;
+    private Tea tea = Tea.MILK_TEA;
     private ArrayList<Topping> toppings = new ArrayList<Topping>();
 
     public BobaGod() {
