@@ -17,7 +17,6 @@ import java.util.concurrent.TimeUnit;
 import javax.imageio.ImageIO;
 
 import iosquishy.ImageGen.BobaGod;
-import iosquishy.ImageGen.ImgEditor;
 import iosquishy.ImageGen.MenuCompiler;
 import iosquishy.ImageGen.BobaGod.CupStyle;
 import iosquishy.ImageGen.BobaGod.Tea;

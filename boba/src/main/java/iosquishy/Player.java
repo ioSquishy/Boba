@@ -15,7 +15,7 @@ import org.javacord.api.entity.message.MessageBuilder;
 import iosquishy.ImageGen.BobaGod;
 import iosquishy.ImageGen.ImgEditor;
 
-public class Player {//if ur reading this am going to the philippines :P
+public class Player {
     //coins
     public static int getCoins(long userID) {
         Document doc = Data.getUserDoc(userID);

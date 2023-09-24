@@ -2,9 +2,12 @@ package iosquishy.ImageGen;
 
 import java.awt.Image;
 import java.awt.image.BufferedImage;
+import java.time.Instant;
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 
 public class BobaGod {
     public static enum CupStyle {
@@ -58,8 +61,26 @@ public class BobaGod {
 		/* Topping Style */
 		toppingStyle.put(CupStyle.SEALED_CUP, sealed_cup_toppingImage);
     }
-    
-    //Local Stuff + Default Styles
+
+    //Static stuff
+    private static HashMap<Long, BobaGod> activeEditors = new HashMap<Long, BobaGod>();
+    private static ScheduledExecutorService autoExe = Executors.newSingleThreadScheduledExecutor();
+    private static Runnable removeInactiveEditors = () -> {
+        HashMap<Long, BobaGod> activeEditorCopy = new HashMap<Long, BobaGod>(activeEditors);
+
+        for (BobaGod editor : activeEditorCopy.values()) {
+            if (Instant.now().getEpochSecond()-editor.getLastCmdUseSec() > 60) {
+                //not done
+            }
+        }
+    };
+
+    public static BobaGod getBobaGod(long userID) {
+        return activeEditors.get(userID);
+    }
+    //Local Stuff
+    private long lastCmdUseSec = Instant.now().getEpochSecond();
+
     private ImgEditor boba;
     private CupStyle cup = CupStyle.SEALED_CUP;
     private Tea tea = Tea.MILK_TEA;
@@ -120,6 +141,9 @@ public class BobaGod {
             toppingElements += toppings.get(topping).toString() + " ";
         }
         return tea.toString() + " " + toppingElements + cup.toString();
+    }
+    public long getLastCmdUseSec() {
+        return lastCmdUseSec;
     }
 
     //create boba from elements

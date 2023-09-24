@@ -3,7 +3,7 @@ package iosquishy.Commands;
 import org.javacord.api.interaction.SlashCommandBuilder;
 import org.javacord.api.interaction.SlashCommandInteraction;
 
-public class Upgrades {
+public class Shop {
     public static SlashCommandBuilder createCommand () {
         return new SlashCommandBuilder()
             .setName("upgrades")
