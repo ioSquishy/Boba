@@ -6,6 +6,7 @@ import org.javacord.api.interaction.SlashCommandBuilder;
 import org.javacord.api.interaction.SlashCommandInteraction;
 
 import iosquishy.Player;
+import iosquishy.ImageGen.BobaGod;
 
 public class CreateBoba {
     private static final short[] coinCost = {0, 500, 1000, 1500, 2000};
@@ -26,6 +27,6 @@ public class CreateBoba {
         if (Player.getCoins(userID) < coinCost[futureBobaQuant]) { //if player doesnt have enough coins
                 interaction.createImmediateResponder().setContent("You need `" + coinCost[futureBobaQuant] + "` coins to purchase a new boba! You can still play around with the editor though.").respond();
         }
-        
+        BobaGod bobaGod = new BobaGod(userID);
     }
 }

@@ -19,6 +19,7 @@ public class App {
         
         BobaGod.initBobaMaps();
         MenuCompiler.initMenuMaps();
+        BobaGod.startBobaGodCleaner();
         
         System.out.println("Saiko is online!");
 

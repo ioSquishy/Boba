@@ -36,11 +36,11 @@ class Test {
 
         BobaGod.initBobaMaps();
 
-        BobaGod boba = new BobaGod();
+        BobaGod boba = new BobaGod(0);
         boba.setCupStyle(CupStyle.SEALED_CUP);
         boba.setTea(Tea.MILK_TEA);
         boba.addTopping(Topping.PEARL);
-        BufferedImage singleBoba = boba.getBoba();
+        BufferedImage singleBoba = boba.getBobaImage();
 
         Image[] testImages = new Image[] {singleBoba, singleBoba, singleBoba, singleBoba, singleBoba, singleBoba, singleBoba, singleBoba, singleBoba, singleBoba, singleBoba, singleBoba};
         String[] testNames = new String[] {"1234567890", "12345678901234567890", "Matcha Green Tea", "Mango Oolong Tea w/ Lychee Jellyyyyyyyyyyyyyyyyyy", "Strawberry Black Tea w/ Lychee Jelly", "test name", "test name", "testname", "test name", "test name", "test name", "testname"};

@@ -5,9 +5,17 @@ import java.awt.image.BufferedImage;
 import java.time.Instant;
 import java.awt.Color;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+
+import org.bson.Document;
+import org.javacord.api.entity.message.component.SelectMenuOption;
+import org.javacord.api.entity.message.embed.EmbedBuilder;
 
 public class BobaGod {
     public static enum CupStyle {
@@ -18,6 +26,9 @@ public class BobaGod {
     }
     public static enum Topping {
         PEARL, LYCHEE, JELLY, MANGO
+    }
+    private static enum CurrentlyEditing {
+        CUP, TEA, TOPPINGS
     }
     private static HashMap<CupStyle, Image> cupImage = new HashMap<>(CupStyle.values().length);
     private static HashMap<CupStyle, Image> teaImage = new HashMap<>(CupStyle.values().length);
@@ -68,12 +79,15 @@ public class BobaGod {
     private static Runnable removeInactiveEditors = () -> {
         HashMap<Long, BobaGod> activeEditorCopy = new HashMap<Long, BobaGod>(activeEditors);
 
-        for (BobaGod editor : activeEditorCopy.values()) {
-            if (Instant.now().getEpochSecond()-editor.getLastCmdUseSec() > 60) {
-                //not done
+        for (Map.Entry<Long, BobaGod> editor : activeEditorCopy.entrySet()) {
+            if (Instant.now().getEpochSecond()-editor.getValue().getLastCmdUseSec() > (60*10)) {
+                activeEditors.remove(editor.getKey());
             }
         }
     };
+    public static void startBobaGodCleaner() {
+        autoExe.scheduleAtFixedRate(removeInactiveEditors, 30, 30, TimeUnit.MINUTES);
+    }
 
     public static BobaGod getBobaGod(long userID) {
         return activeEditors.get(userID);
@@ -83,11 +97,13 @@ public class BobaGod {
 
     private ImgEditor boba;
     private CupStyle cup = CupStyle.SEALED_CUP;
-    private Tea tea = Tea.MILK_TEA;
+    private Tea tea = null;
     private ArrayList<Topping> toppings = new ArrayList<Topping>();
+    private CurrentlyEditing currentlyEditing = CurrentlyEditing.CUP;
 
-    public BobaGod() {
+    public BobaGod(long userID) {
         this.boba = new ImgEditor(512, 512);
+        activeEditors.put(userID, this);
     }
 
     //Set Methods
@@ -112,7 +128,7 @@ public class BobaGod {
 
     //Return methods
     //drink -> toppings -> cup -> add metadata
-    public BufferedImage getBoba() {
+    public BufferedImage getBobaImage() {
         if (this.cup!=null) {
             if (this.tea != null) {
                 this.boba.setLayer("drink", ImgEditor.recolorImage(teaImage.get(cup), teaColor.get(tea)));
@@ -145,7 +161,18 @@ public class BobaGod {
     public long getLastCmdUseSec() {
         return lastCmdUseSec;
     }
-
+    public EmbedBuilder getEditorEmbed() {
+        List<SelectMenuOption> editingOptions = Collections.EMPTY_LIST;
+        switch (currentlyEditing) {
+            case CUP:
+                break;
+            case TEA:
+                break;
+            case TOPPINGS:
+                break;
+        }
+        return null;
+    }
     //create boba from elements
     public static BufferedImage recompileBoba(String bobaElements) {
         String[] elements = bobaElements.split(" ");
