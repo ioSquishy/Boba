@@ -34,6 +34,7 @@ public class BobaGod {
     private static HashMap<CupStyle, Image> teaImage = new HashMap<>(CupStyle.values().length);
     private static HashMap<Tea, Color> teaColor = new HashMap<>(Tea.values().length);
 	private static HashMap<CupStyle, HashMap<Topping, Image>> toppingStyle = new HashMap<>(CupStyle.values().length);
+    private static HashMap<Topping, Image> newToppings = new HashMap<>(CupStyle.values().length);
     private static HashMap<Topping, Image> sealed_cup_toppingImage = new HashMap<>(Topping.values().length);
     private static List<SelectMenuOption> cupOptions = Collections.emptyList();
     private static List<SelectMenuOption> teaOptions = Collections.emptyList();
@@ -77,6 +78,9 @@ public class BobaGod {
 
 		/* Topping Style */
 		toppingStyle.put(CupStyle.SEALED_CUP, sealed_cup_toppingImage);
+
+        // experimental:
+        newToppings.put(Topping.PEARL, ImgEditor.getImageFromPath("boba\\src\\main\\assets\\Toppings\\SINGLE_PEARL.png"));
     }
 
     //Static stuff
@@ -131,17 +135,22 @@ public class BobaGod {
             toppings.remove(topping);
         }
     }
+    private static Image populateToppings(ArrayList<Topping> toppings, CupStyle cupStyle) {
+        //populate toppings progamatically
+        return null;
+    }
 
     //Return methods
-    //drink -> toppings -> cup -> add metadata
+    //drink -> toppings -> cup
     public BufferedImage getBobaImage() {
         if (this.cup!=null) {
             if (this.tea != null) {
                 this.boba.setLayer("drink", ImgEditor.recolorImage(teaImage.get(cup), teaColor.get(tea)));
                 if (!toppings.isEmpty()) {
-                    for (Topping topping : toppings) {
-                        this.boba.setLayer(topping.toString(), sealed_cup_toppingImage.get(topping));
-                    }
+                    this.boba.setLayer("Toppings", populateToppings(toppings, cup));
+                    // for (Topping topping : toppings) { <- this is the old topping code
+                    //     this.boba.setLayer(topping.toString(), sealed_cup_toppingImage.get(topping));
+                    // }
                 }
             }
             this.boba.setLayer("cup", cupImage.get(cup));
