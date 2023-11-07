@@ -8,6 +8,6 @@ Idle Discord game bot where users can customize their own bobas to sell to other
 - Menus are also generated progmatically
 
 # Dependencies
-- JavaCord
-- Java .env
-- MongoDB
+- Javacord (https://javacord.org/)
+- Dotenv (https://github.com/cdimascio/dotenv-java)
+- MongoDB (https://www.mongodb.com/)
