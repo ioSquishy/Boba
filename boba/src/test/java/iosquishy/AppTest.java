@@ -17,7 +17,6 @@ import java.util.concurrent.TimeUnit;
 import javax.imageio.ImageIO;
 
 import iosquishy.ImageGen.BobaGod;
-import iosquishy.ImageGen.ImgEditor;
 import iosquishy.ImageGen.MenuCompiler;
 import iosquishy.ImageGen.BobaGod.CupStyle;
 import iosquishy.ImageGen.BobaGod.Tea;
@@ -26,6 +25,10 @@ import iosquishy.ImageGen.MenuCompiler.MenuTheme;
 
 class Test {
     private static ScheduledExecutorService exe = Executors.newSingleThreadScheduledExecutor();
+
+    private static enum TestEnum {
+        A, B, C
+    }
     public static void main(String[] args) {
         // BufferedImage img = ImgEditor.getImageFromURL("https://cdn.discordapp.com/attachments/818275525797609472/1132459889692770416/image.png");
         
@@ -33,24 +36,22 @@ class Test {
 
         BobaGod.initBobaMaps();
 
-        BobaGod boba = new BobaGod();
+        BobaGod boba = new BobaGod(0);
         boba.setCupStyle(CupStyle.SEALED_CUP);
         boba.setTea(Tea.MILK_TEA);
         boba.addTopping(Topping.PEARL);
-        BufferedImage singleBoba = boba.getBoba();
+        BufferedImage singleBoba = boba.getBobaImage();
 
-        Image[] testImages = new Image[] {singleBoba, singleBoba, singleBoba, singleBoba, singleBoba, singleBoba, singleBoba, singleBoba, singleBoba, singleBoba, singleBoba, singleBoba};
+        // Image[] testImages = new Image[] {singleBoba, singleBoba, singleBoba, singleBoba, singleBoba, singleBoba, singleBoba, singleBoba, singleBoba, singleBoba, singleBoba, singleBoba};
+        // String[] testNames = new String[] {"1234567890", "12345678901234567890", "Matcha Green Tea", "Mango Oolong Tea w/ Lychee Jellyyyyyyyyyyyyyyyyyy", "Strawberry Black Tea w/ Lychee Jelly", "test name", "test name", "testname", "test name", "test name", "test name", "testname"};
 
         File outputfile = new File("output.png");
         try {
-            ImageIO.write(MenuCompiler.compileMenu("squishy boba", MenuTheme.EMPTY, testImages), "png", outputfile);
+            // ImageIO.write(MenuCompiler.compileMenu("test cafe", MenuTheme.EMPTY, testImages, testNames), "png", outputfile);
+            ImageIO.write(singleBoba, "png", outputfile);
         } catch (IOException e) {
             e.printStackTrace();
         }
-    }
-
-    static void checkCoins(long userID) {
-        System.out.println("coins " + Player.getCoins(userID));
     }
 
 }

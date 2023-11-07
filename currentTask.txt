@@ -1,0 +1,2 @@
+1. Make toppings auto-populate the tea area instead of having to have an image of every topping for every cup
+2. Complete embedBuilder for BobaGod

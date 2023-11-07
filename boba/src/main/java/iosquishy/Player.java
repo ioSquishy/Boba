@@ -4,9 +4,16 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
+import java.awt.image.BufferedImage;
 
 import org.bson.Document;
 import org.javacord.api.entity.channel.TextChannel;
+import org.javacord.api.entity.message.MessageAttachment;
+import org.javacord.api.entity.message.MessageBuilder;
+
+import iosquishy.ImageGen.BobaGod;
+import iosquishy.ImageGen.ImgEditor;
 
 public class Player {
     //coins
@@ -84,9 +91,8 @@ public class Player {
         if (ImgEditor.getImageFromURL(bobaNamesAndImages[1][0]) != null) {
             return bobaNamesAndImages;
         } else {
-
+            return recompileBobas(doc, textChannel);
         }
-        return getBobaNamesAndImages(doc);
     }
     public static void reorderBobas(long userID, byte[] reorderedOldIndicies) {
         Document doc = Data.getUserDoc(userID);
@@ -145,33 +151,45 @@ public class Player {
         String[] bobaImages = (String[]) doc.get("bobaImages");
         return new String[][] {bobaNames, bobaImages};
     }
-    private static String[] getBobaElements(Document doc) {
-        return (Stringp[]) doc.get("bobaElements");
-    }
     private static void updateBobasViaList(Document doc, List<List<String>> bobas) {
         doc.put("bobaNames", bobas.get(0));
         doc.put("bobaImages", bobas.get(1));
         doc.put("bobaElements", bobas.get(2));
     }
+    private static void updateBobasViaArray(Document doc, String[][] bobas) {
+        doc.put("bobaNames", bobas[0]);
+        doc.put("bobaImages", bobas[1]);
+        doc.put("bobaElements", bobas[2]);
+    }
     /**
      * 
      * @param bobaImagesAndElements [0] is images<br>[1] is elements
      * @param channel to send message of new images to
+     * @return String[][] of boba names and images
      */
-    private static boolean recompileBobas(String[][] bobaImagesAndElements, TextChannel channel) {
-        MessageBuilder msgBuilder1 = null;
-        MessageBuilder msgBuilder2 = null;
-        boolean splitMsg = false;
-        if (bobaImagesAndElements.length > 10) {
-            splitMsg = true;
-            //split the images between msgbuilder 1 and 2
-        }
-        for (int bobaImage = 0; bobaImage < bobaImagesAndElements.length; bobaImage++) {
-            BufferedImage newBobaImg = BobaGod.recompileBoba(bobaImagesAndElements[1][bobaImage]);
-            //add image to msgBuilder1
-            if (splitMsg && bobaImages > 6) {
-                //add image to msgBuilder2
+    private static String[][] recompileBobas(Document doc, TextChannel channel) {
+        String[][] fullBobaArray = getFullBobaArray(doc);
+        MessageBuilder msgBuilder1 = new MessageBuilder();
+        MessageBuilder msgBuilder2 = new MessageBuilder();
+        msgBuilder1.setContent("Saiko stores your boba images using Discord CDNS so if you delete these messages, it will take longer to view your bobas!");
+        for (int bobaImage = 0; bobaImage < fullBobaArray[2].length; bobaImage++) {
+            BufferedImage newBobaImg = BobaGod.recompileBoba(fullBobaArray[2][bobaImage]);
+            msgBuilder1.addAttachment(newBobaImg, bobaImage+"");
+            if (bobaImage > 6) {
+                msgBuilder2.addAttachment(newBobaImg, bobaImage+"");
             }
+        }
+        try {
+            List<MessageAttachment> msgAttachments = msgBuilder1.send(channel).get().getAttachments();
+            msgAttachments.addAll(msgBuilder2.send(channel).get().getAttachments());
+            for (int bobaImg = 0; bobaImg < fullBobaArray[1].length; bobaImg++) {
+                fullBobaArray[1][bobaImg] = msgAttachments.get(bobaImg).getUrl().toString();
+            }
+            updateBobasViaArray(doc, fullBobaArray);
+            return new String[][] {fullBobaArray[0], fullBobaArray[1]};
+        } catch (InterruptedException | ExecutionException e) {
+            e.printStackTrace();
+            return null;
         }
     }
 
