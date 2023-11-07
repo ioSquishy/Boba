@@ -42,12 +42,13 @@ class Test {
         boba.addTopping(Topping.PEARL);
         BufferedImage singleBoba = boba.getBobaImage();
 
-        Image[] testImages = new Image[] {singleBoba, singleBoba, singleBoba, singleBoba, singleBoba, singleBoba, singleBoba, singleBoba, singleBoba, singleBoba, singleBoba, singleBoba};
-        String[] testNames = new String[] {"1234567890", "12345678901234567890", "Matcha Green Tea", "Mango Oolong Tea w/ Lychee Jellyyyyyyyyyyyyyyyyyy", "Strawberry Black Tea w/ Lychee Jelly", "test name", "test name", "testname", "test name", "test name", "test name", "testname"};
+        // Image[] testImages = new Image[] {singleBoba, singleBoba, singleBoba, singleBoba, singleBoba, singleBoba, singleBoba, singleBoba, singleBoba, singleBoba, singleBoba, singleBoba};
+        // String[] testNames = new String[] {"1234567890", "12345678901234567890", "Matcha Green Tea", "Mango Oolong Tea w/ Lychee Jellyyyyyyyyyyyyyyyyyy", "Strawberry Black Tea w/ Lychee Jelly", "test name", "test name", "testname", "test name", "test name", "test name", "testname"};
 
         File outputfile = new File("output.png");
         try {
-            ImageIO.write(MenuCompiler.compileMenu("test cafe", MenuTheme.EMPTY, testImages, testNames), "png", outputfile);
+            // ImageIO.write(MenuCompiler.compileMenu("test cafe", MenuTheme.EMPTY, testImages, testNames), "png", outputfile);
+            ImageIO.write(singleBoba, "png", outputfile);
         } catch (IOException e) {
             e.printStackTrace();
         }

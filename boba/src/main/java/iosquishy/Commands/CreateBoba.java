@@ -21,12 +21,13 @@ public class CreateBoba {
     public static void runCommand(SlashCommandInteraction interaction) {
         long userID = interaction.getUser().getId();
         byte futureBobaQuant = (byte) Player.getBobas(userID, interaction.getChannel().orElse(null))[0].length;
-        if (futureBobaQuant >= maxBobas) {
+        if (futureBobaQuant >= maxBobas) { //if player already has max bobas
             interaction.createImmediateResponder().setContent("You have reached your boba capacity! Delete one to make another. You can still play around with the editor though.").respond();
         }
         if (Player.getCoins(userID) < coinCost[futureBobaQuant]) { //if player doesnt have enough coins
-                interaction.createImmediateResponder().setContent("You need `" + coinCost[futureBobaQuant] + "` coins to purchase a new boba! You can still play around with the editor though.").respond();
+            interaction.createImmediateResponder().setContent("You need `" + coinCost[futureBobaQuant] + "` coins to purchase a new boba! You can still play around with the editor though.").respond();
         }
+        //if user is eligible to make a new boba:
         BobaGod bobaGod = new BobaGod(userID);
     }
 }

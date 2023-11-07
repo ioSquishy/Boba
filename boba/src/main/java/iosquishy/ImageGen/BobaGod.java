@@ -13,8 +13,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-import org.bson.Document;
 import org.javacord.api.entity.message.component.SelectMenuOption;
+import org.javacord.api.entity.message.component.SelectMenuOptionBuilder;
 import org.javacord.api.entity.message.embed.EmbedBuilder;
 
 public class BobaGod {
@@ -35,10 +35,14 @@ public class BobaGod {
     private static HashMap<Tea, Color> teaColor = new HashMap<>(Tea.values().length);
 	private static HashMap<CupStyle, HashMap<Topping, Image>> toppingStyle = new HashMap<>(CupStyle.values().length);
     private static HashMap<Topping, Image> sealed_cup_toppingImage = new HashMap<>(Topping.values().length);
+    private static List<SelectMenuOption> cupOptions = Collections.emptyList();
+    private static List<SelectMenuOption> teaOptions = Collections.emptyList();
+    private static List<SelectMenuOption> toppingOptions = Collections.emptyList();
     public static void initBobaMaps() {
         /* Cup Styles */
         //SEALED_CUP:
         cupImage.put(CupStyle.SEALED_CUP, ImgEditor.getImageFromPath("boba\\src\\main\\assets\\CupStyles\\SEALED_CUP.png"));
+        // cupOptions.add(new SelectMenuOptionBuilder().setLabel("Sealed Cup").setValue("SEALED_CUP").build());
         //CAPPED_CUP:
 
         //JAR:
@@ -54,8 +58,10 @@ public class BobaGod {
         /* Tea Color */
         //MILK_TEA:
         teaColor.put(Tea.MILK_TEA, new Color(255, 209, 163));
+        // teaOptions.add(new SelectMenuOptionBuilder().setLabel("Milk Tea").setValue("MILK_TEA").build());
         //GREEN_TEA:
         teaColor.put(Tea.GREEN_TEA, new Color(205, 225, 156));
+        // teaOptions.add(new SelectMenuOptionBuilder().setLabel("Green Tea").setValue("GREEN_TEA").build());
         //BLACK_TEA:
 
 
@@ -80,7 +86,7 @@ public class BobaGod {
         HashMap<Long, BobaGod> activeEditorCopy = new HashMap<Long, BobaGod>(activeEditors);
 
         for (Map.Entry<Long, BobaGod> editor : activeEditorCopy.entrySet()) {
-            if (Instant.now().getEpochSecond()-editor.getValue().getLastCmdUseSec() > (60*10)) {
+            if (Instant.now().getEpochSecond()-editor.getValue().getLastCmdUseSec() > (60*10)) { //10 minutes inactive
                 activeEditors.remove(editor.getKey());
             }
         }
