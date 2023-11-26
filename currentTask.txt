@@ -1,2 +1,2 @@
-1. Make toppings auto-populate the tea area instead of having to have an image of every topping for every cup
+1. make toppings populate in a random spot in a template
 2. Complete embedBuilder for BobaGod
