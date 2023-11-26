@@ -4,13 +4,16 @@ import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.time.Instant;
 import java.awt.Color;
+import java.awt.Point;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 
 import org.javacord.api.entity.message.component.SelectMenuOption;
@@ -135,9 +138,20 @@ public class BobaGod {
             toppings.remove(topping);
         }
     }
-    private static Image populateToppings(ArrayList<Topping> toppings, CupStyle cupStyle) {
-        //populate toppings progamatically
-        return null;
+    private static Point[] toppingTemplate1 = new Point[]{new Point(212, 477)};
+    private static BufferedImage populateToppings(ArrayList<Topping> toppings, BufferedImage teaBackground) {  //populate toppings progamatically
+        ImgEditor populatedToppingsImage = new ImgEditor(512, 512);
+        //randomly choose a topping template
+        List<Point> toppingTemplate = Arrays.asList(toppingTemplate1);
+        byte templateSlotsPerTopping = (byte) (toppingTemplate.size()/toppings.size());
+        for (Topping topping : toppings) {
+            Image toppingSprite = newToppings.get(topping);
+            for (byte i = 0; i < templateSlotsPerTopping; i++) {
+                Point point = toppingTemplate.remove((int)(Math.random() * (toppingTemplate.size() - 0) + 0)                );
+                populatedToppingsImage.setLayer(point.toString(), toppingSprite, point.x, point.y);
+            }
+        }
+        return populatedToppingsImage.getEditedImage();
     }
 
     //Return methods
@@ -147,7 +161,7 @@ public class BobaGod {
             if (this.tea != null) {
                 this.boba.setLayer("drink", ImgEditor.recolorImage(teaImage.get(cup), teaColor.get(tea)));
                 if (!toppings.isEmpty()) {
-                    this.boba.setLayer("Toppings", populateToppings(toppings, cup));
+                    this.boba.setLayer("Toppings", populateToppings(toppings, boba.getEditedImage()));
                     // for (Topping topping : toppings) { <- this is the old topping code
                     //     this.boba.setLayer(topping.toString(), sealed_cup_toppingImage.get(topping));
                     // }
