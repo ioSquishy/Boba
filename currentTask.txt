@@ -1,3 +1,4 @@
 1. make function create a template for toppings to go and then populate randomly
-    1a. template does not work because then I would still need different coordinates for each type of cup
+    a. points of template must be 16 pixels apart from each other in x and y axis
+    b. higher density near bottom somehow
 2. Complete embedBuilder for BobaGod

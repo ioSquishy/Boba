@@ -149,22 +149,25 @@ public class BobaGod {
         int[] leftEdges = new int[512];
         int[] rightEdges = new int[512];
         //spread out type beat
-        int lossOfDetail = 4; //skips said amount of pixels to save time, must be >= 4 to be useful, otherwise should use binary type beat search | note: must be divisble by 512
+        int lossOfDetail = 8; //skips said amount of pixels to save time, must be >= 4 to be useful, otherwise should use binary type beat search | note: must be divisble by 512
         for (int y = 0; y < 512; y++) {
             //left half
-            for (int x = 256-1; x >= 0; x-=lossOfDetail) {
+            for (int x = 256; x >= 0; x-=lossOfDetail) {
                 if (teaBackground.getRGB(x, y)>>24 == 0x00) { //if pixel is transparent
-                    leftEdges[y] = x+lossOfDetail;
+                    leftEdges[y] = x;
                     break;
                 }
             }
             //right half
             for (int x = 256; x < 512; x+=lossOfDetail) {
                 if (teaBackground.getRGB(x, y)>>24 == 0x00) { //if pixel is transparent
-                    rightEdges[y] = x-lossOfDetail;
+                    rightEdges[y] = x;
                     break;
                 }
             }
+        }
+        for (int i = 0; i < 512; i++) {
+            System.out.println(leftEdges[i] + " | " + rightEdges[i]);
         }
         //binary type beat search - slower than spread search when lossOfDetail >= 4. however, it is gives the exact edges
         // int[] leftEdges2 = new int[512];
@@ -202,6 +205,7 @@ public class BobaGod {
         //     }
         //     rightEdges2[y] = leftBound;
         // }
+
         return populatedToppingsImage.getEditedImage();
     }
 
