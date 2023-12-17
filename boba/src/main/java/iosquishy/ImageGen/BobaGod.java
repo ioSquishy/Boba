@@ -148,8 +148,13 @@ public class BobaGod {
         ImgEditor populatedToppingsImage = new ImgEditor(512, 512);
         int[] leftEdges = new int[512];
         int[] rightEdges = new int[512];
+        long spreadStart;
+        long spreadEnd;
+        long binaryStart;
+        long binaryEnd;
         //spread out type beat
-        int lossOfDetail = 8; //skips said amount of pixels to save time, must be >= 4 to be useful, otherwise should use binary type beat search | note: must be divisble by 512
+        spreadStart = System.nanoTime();
+        int lossOfDetail = 8; //skips said amount of pixels to save time, must be >= 8 to be useful, otherwise should use binary type beat search | note: must be divisble by 512
         for (int y = 0; y < 512; y++) {
             //left half
             for (int x = 256; x >= 0; x-=lossOfDetail) {
@@ -166,46 +171,51 @@ public class BobaGod {
                 }
             }
         }
-        for (int i = 0; i < 512; i++) {
-            System.out.println(leftEdges[i] + " | " + rightEdges[i]);
-        }
+        spreadEnd = System.nanoTime();
         //binary type beat search - slower than spread search when lossOfDetail >= 4. however, it is gives the exact edges
-        // int[] leftEdges2 = new int[512];
-        // int[] rightEdges2 = new int[512];
-        // for (int y = 0; y < 512; y++) {
-        //     //left half
-        //     boolean leftEdgeFound = false;
-        //     boolean rightEdgeFound = false;
-        //     int leftBound = 0;
-        //     int rightBound = 256;
-        //     while (!leftEdgeFound) {
-        //         if (rightBound-leftBound <= 1) {
-        //             leftEdgeFound = true;
-        //         }
-        //         int xCheck = ((rightBound-leftBound)/2) + leftBound;
-        //         if (teaBackground.getRGB(xCheck, y)>>24 == 0x00) { //if pixel in middle of rB-lB is transparent
-        //             leftBound = xCheck;
-        //         } else {
-        //             rightBound = xCheck;
-        //         }
-        //     }
-        //     leftEdges2[y] = rightBound;
-        //     leftBound = 256;
-        //     rightBound = 512;
-        //     while (!rightEdgeFound) {
-        //         if (rightBound-leftBound <= 1) {
-        //             rightEdgeFound = true;
-        //         }
-        //         int xCheck = ((rightBound-leftBound)/2) + leftBound;
-        //         if (teaBackground.getRGB(xCheck, y)>>24 == 0x00) { //if pixel in middle of rB-lB is transparent
-        //             rightBound = xCheck;
-        //         } else {
-        //             leftBound = xCheck;
-        //         }
-        //     }
-        //     rightEdges2[y] = leftBound;
-        // }
-
+        int[] leftEdges2 = new int[512];
+        int[] rightEdges2 = new int[512];
+        binaryStart = System.nanoTime();
+        for (int y = 0; y < 512; y++) {
+            //left half
+            boolean leftEdgeFound = false;
+            boolean rightEdgeFound = false;
+            int leftBound = 0;
+            int rightBound = 256;
+            while (!leftEdgeFound) {
+                if (rightBound-leftBound <= 1) {
+                    leftEdgeFound = true;
+                }
+                int xCheck = ((rightBound-leftBound)/2) + leftBound;
+                if (teaBackground.getRGB(xCheck, y)>>24 == 0x00) { //if pixel in middle of rB-lB is transparent
+                    leftBound = xCheck;
+                } else {
+                    rightBound = xCheck;
+                }
+            }
+            leftEdges2[y] = rightBound;
+            leftBound = 256;
+            rightBound = 512;
+            while (!rightEdgeFound) {
+                if (rightBound-leftBound <= 1) {
+                    rightEdgeFound = true;
+                }
+                int xCheck = ((rightBound-leftBound)/2) + leftBound;
+                if (teaBackground.getRGB(xCheck, y)>>24 == 0x00) { //if pixel in middle of rB-lB is transparent
+                    rightBound = xCheck;
+                } else {
+                    leftBound = xCheck;
+                }
+            }
+            rightEdges2[y] = leftBound;
+        }
+        binaryEnd = System.nanoTime();
+        //calcs
+        System.out.println("Spread Time: " + (spreadEnd-spreadStart));
+        System.out.println("Binary Time: " + (binaryEnd-binaryStart));
+        //similarity
+        System.out.println("Spread: " + leftEdges[255]);
+        System.out.println("Binary: " + leftEdges2[255]);
         return populatedToppingsImage.getEditedImage();
     }
 
