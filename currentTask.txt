@@ -1,2 +1,3 @@
-1. make toppings populate in a random spot in a template
+1. make function create a template for toppings to go and then populate randomly
+    1a. template does not work because then I would still need different coordinates for each type of cup
 2. Complete embedBuilder for BobaGod

@@ -1,7 +1,12 @@
 package iosquishy.ImageGen;
 
 import java.awt.Image;
+import java.awt.Panel;
 import java.awt.image.BufferedImage;
+import java.awt.image.TileObserver;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.time.Instant;
 import java.awt.Color;
 import java.awt.Point;
@@ -9,6 +14,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Executors;
@@ -138,19 +144,26 @@ public class BobaGod {
             toppings.remove(topping);
         }
     }
-    private static Point[] toppingTemplate1 = new Point[]{new Point(212, 477)};
-    private static BufferedImage populateToppings(ArrayList<Topping> toppings, BufferedImage teaBackground) {  //populate toppings progamatically
+    private static BufferedImage populateToppings(ArrayList<Topping> toppings, BufferedImage teaBackground) throws IOException {  //populate toppings progamatically
         ImgEditor populatedToppingsImage = new ImgEditor(512, 512);
-        //randomly choose a topping template
-        List<Point> toppingTemplate = Arrays.asList(toppingTemplate1);
-        byte templateSlotsPerTopping = (byte) (toppingTemplate.size()/toppings.size());
-        for (Topping topping : toppings) {
-            Image toppingSprite = newToppings.get(topping);
-            for (byte i = 0; i < templateSlotsPerTopping; i++) {
-                Point point = toppingTemplate.remove((int)(Math.random() * (toppingTemplate.size() - 0) + 0)                );
-                populatedToppingsImage.setLayer(point.toString(), toppingSprite, point.x, point.y);
+        ArrayList<Point> opaquePixels = new ArrayList<>();
+        FileWriter writer = new FileWriter("test.txt");
+        for (int pixelY = 0; pixelY < 512; pixelY++) {
+            boolean foundLeftEdge = false;
+            for (int pixelX = 0; pixelX < 512; pixelX++) {
+                if (teaBackground.getRGB(pixelX, pixelY)>>24 != 0x00) { //if pixel is opaque
+                    foundLeftEdge = true;
+                    opaquePixels.add(new Point(pixelX, pixelY));
+                    writer.append('X');
+                } else if (foundLeftEdge == true) {
+                    break;
+                } else {
+                    writer.append('O');
+                }
             }
+            writer.append('\n');
         }
+        writer.close();
         return populatedToppingsImage.getEditedImage();
     }
 
@@ -161,7 +174,12 @@ public class BobaGod {
             if (this.tea != null) {
                 this.boba.setLayer("drink", ImgEditor.recolorImage(teaImage.get(cup), teaColor.get(tea)));
                 if (!toppings.isEmpty()) {
-                    this.boba.setLayer("Toppings", populateToppings(toppings, boba.getEditedImage()));
+                    try {
+                        this.boba.setLayer("Toppings", populateToppings(toppings, boba.getEditedImage()));
+                    } catch (IOException e) {
+                        // TODO Auto-generated catch block
+                        e.printStackTrace();
+                    }
                     // for (Topping topping : toppings) { <- this is the old topping code
                     //     this.boba.setLayer(topping.toString(), sealed_cup_toppingImage.get(topping));
                     // }
