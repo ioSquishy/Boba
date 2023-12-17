@@ -17,6 +17,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadLocalRandom;
@@ -41,6 +42,7 @@ public class BobaGod {
     }
     private static HashMap<CupStyle, Image> cupImage = new HashMap<>(CupStyle.values().length);
     private static HashMap<CupStyle, Image> teaImage = new HashMap<>(CupStyle.values().length);
+    private static HashMap<CupStyle, Short[][]> teaImageEdges = new HashMap<>(CupStyle.values().length);
     private static HashMap<Tea, Color> teaColor = new HashMap<>(Tea.values().length);
 	private static HashMap<CupStyle, HashMap<Topping, Image>> toppingStyle = new HashMap<>(CupStyle.values().length);
     private static HashMap<Topping, Image> newToppings = new HashMap<>(CupStyle.values().length);
@@ -61,6 +63,7 @@ public class BobaGod {
         /* Tea Image */
         //SEALED_CUP
         teaImage.put(CupStyle.SEALED_CUP, ImgEditor.getImageFromPath("boba\\src\\main\\assets\\TeaShapes\\SEALED_CUP_TEA.png"));
+        teaImageEdges.put(CupStyle.SEALED_CUP, getOpaqueEdges(ImgEditor.imageToBimage(teaImage.get(CupStyle.SEALED_CUP))));
         //CAPPED_CUP
 
         //JAR
@@ -111,6 +114,69 @@ public class BobaGod {
     public static BobaGod getBobaGod(long userID) {
         return activeEditors.get(userID);
     }
+    /**
+     * Returns left and right edges of an opaque image on a transparent background.
+     * @param img
+     * @return
+     * [0][x]: returns leftEdge
+     * [1][x]: return rightEdge
+     */
+    private static Short[][] getOpaqueEdges(BufferedImage img) {
+        Short[] leftEdges = new Short[512];
+        Short[] rightEdges = new Short[512];
+        // // gets the left/right borders between transparent and opaque pixels
+        // int lossOfDetail = 8; //skips said amount of pixels to save time, must be >= 4 to be useful, otherwise should use binary type beat search | note: must be divisble by 512
+        // for (short y = 0; y < 512; y++) {
+        //     //left half
+        //     for (short x = 256; x >= 0; x-=lossOfDetail) {
+        //         if (img.getRGB(x, y)>>24 == 0x00) { //if pixel is transparent
+        //             leftEdges[y] = x;
+        //             break;
+        //         }
+        //     }
+        //     //right half
+        //     for (short x = 256; x < 512; x+=lossOfDetail) {
+        //         if (img.getRGB(x, y)>>24 == 0x00) { //if pixel is transparent
+        //             rightEdges[y] = x;
+        //             break;
+        //         }
+        //     }
+        // }
+        for (short y = 0; y < 512; y++) {
+            //left half
+            boolean leftEdgeFound = false;
+            boolean rightEdgeFound = false;
+            short leftBound = 0;
+            short rightBound = 256;
+            while (!leftEdgeFound) {
+                if (rightBound-leftBound <= 1) {
+                    leftEdgeFound = true;
+                }
+                short xCheck = (short) (((rightBound-leftBound)/2) + leftBound);
+                if (img.getRGB(xCheck, y)>>24 == 0x00) { //if pixel in middle of rB-lB is transparent
+                    leftBound = xCheck;
+                } else {
+                    rightBound = xCheck;
+                }
+            }
+            leftEdges[y] = rightBound;
+            leftBound = 256;
+            rightBound = 512;
+            while (!rightEdgeFound) {
+                if (rightBound-leftBound <= 1) {
+                    rightEdgeFound = true;
+                }
+                short xCheck = (short) (((rightBound-leftBound)/2) + leftBound);
+                if (img.getRGB(xCheck, y)>>24 == 0x00) { //if pixel in middle of rB-lB is transparent
+                    rightBound = xCheck;
+                } else {
+                    leftBound = xCheck;
+                }
+            }
+            rightEdges[y] = leftBound;
+        }
+        return new Short[][] {leftEdges, rightEdges};
+    }
     //Local Stuff
     private long lastCmdUseSec = Instant.now().getEpochSecond();
 
@@ -144,29 +210,18 @@ public class BobaGod {
             toppings.remove(topping);
         }
     }
-    private static BufferedImage populateToppings(ArrayList<Topping> toppings, BufferedImage teaBackground) throws IOException {  //populate toppings progamatically
+    private static Random random = new Random();
+    private static BufferedImage populateToppings(ArrayList<Topping> toppings, CupStyle cupStyle) {  //populate toppings progamatically
         ImgEditor populatedToppingsImage = new ImgEditor(512, 512);
-        int[] leftEdges = new int[512];
-        int[] rightEdges = new int[512];
-        // gets the left/right borders between transparent and opaque pixels
-        int lossOfDetail = 8; //skips said amount of pixels to save time, must be >= 4 to be useful, otherwise should use binary type beat search | note: must be divisble by 512
-        for (int y = 0; y < 512; y++) {
-            //left half
-            for (int x = 256; x >= 0; x-=lossOfDetail) {
-                if (teaBackground.getRGB(x, y)>>24 == 0x00) { //if pixel is transparent
-                    leftEdges[y] = x;
-                    break;
-                }
-            }
-            //right half
-            for (int x = 256; x < 512; x+=lossOfDetail) {
-                if (teaBackground.getRGB(x, y)>>24 == 0x00) { //if pixel is transparent
-                    rightEdges[y] = x;
-                    break;
-                }
-            }
+        //get edges of teaBackground
+        Short[] leftEdges = teaImageEdges.get(cupStyle)[0];
+        Short[] rightEdges = teaImageEdges.get(cupStyle)[1];
+        // generate template of spots to place boba sprites
+        int bobaSlotsToGen = 30 + random.nextInt(6); //generates 30-35 bobaSlots
+        Point[] slots = new Point[bobaSlotsToGen];
+        for (int slot = 0; slot < bobaSlotsToGen; slot++) {
+
         }
-        // 
         return populatedToppingsImage.getEditedImage();
     }
 
@@ -177,12 +232,7 @@ public class BobaGod {
             if (this.tea != null) {
                 this.boba.setLayer("drink", ImgEditor.recolorImage(teaImage.get(cup), teaColor.get(tea)));
                 if (!toppings.isEmpty()) {
-                    try {
-                        this.boba.setLayer("Toppings", populateToppings(toppings, boba.getEditedImage()));
-                    } catch (IOException e) {
-                        // TODO Auto-generated catch block
-                        e.printStackTrace();
-                    }
+                    this.boba.setLayer("Toppings", populateToppings(toppings, cup));
                     // for (Topping topping : toppings) { <- this is the old topping code
                     //     this.boba.setLayer(topping.toString(), sealed_cup_toppingImage.get(topping));
                     // }

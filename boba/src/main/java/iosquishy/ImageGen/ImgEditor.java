@@ -92,14 +92,12 @@ public class ImgEditor {
      * @return Edited BufferedImage.
      */
     public static BufferedImage recolorImage(Image image, Color color) {
-        int width = image.getWidth(null);
-        int height = image.getHeight(null);
-
         //Convert Image to BufferedImage
-        BufferedImage bimage = new BufferedImage(width, height, 2);
-        bimage.createGraphics().drawImage(image, 0, 0, null);
-
+        BufferedImage bimage = imageToBimage(image);
+        
         //Recolor pixels in the BufferedImage
+        int width = bimage.getWidth();
+        int height = bimage.getHeight();
         for (int x = 0; x < width; x++) {
             for (int y = 0; y < height; y++) {
                 Color originalColor = new Color(bimage.getRGB(x, y), true);
@@ -120,6 +118,17 @@ public class ImgEditor {
      */
     public static Image getImageFromPath(String filePath) {
         return new ImageIcon(filePath).getImage();
+    }
+
+    /**
+     * Converts Image to BufferedImage
+     * @param image
+     * @return BufferedImage
+     */
+    public static BufferedImage imageToBimage(Image image) {
+        BufferedImage bimage = new BufferedImage(image.getWidth(null), image.getHeight(null), BufferedImage.TYPE_INT_ARGB);
+        bimage.createGraphics().drawImage(image, 0, 0, null);
+        return bimage;
     }
 
     /**
