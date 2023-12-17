@@ -146,24 +146,62 @@ public class BobaGod {
     }
     private static BufferedImage populateToppings(ArrayList<Topping> toppings, BufferedImage teaBackground) throws IOException {  //populate toppings progamatically
         ImgEditor populatedToppingsImage = new ImgEditor(512, 512);
-        ArrayList<Point> opaquePixels = new ArrayList<>();
-        FileWriter writer = new FileWriter("test.txt");
-        for (int pixelY = 0; pixelY < 512; pixelY++) {
-            boolean foundLeftEdge = false;
-            for (int pixelX = 0; pixelX < 512; pixelX++) {
-                if (teaBackground.getRGB(pixelX, pixelY)>>24 != 0x00) { //if pixel is opaque
-                    foundLeftEdge = true;
-                    opaquePixels.add(new Point(pixelX, pixelY));
-                    writer.append('X');
-                } else if (foundLeftEdge == true) {
+        int[] leftEdges = new int[512];
+        int[] rightEdges = new int[512];
+        //spread out type beat
+        int lossOfDetail = 4; //skips said amount of pixels to save time, must be >= 4 to be useful, otherwise should use binary type beat search | note: must be divisble by 512
+        for (int y = 0; y < 512; y++) {
+            //left half
+            for (int x = 256-1; x >= 0; x-=lossOfDetail) {
+                if (teaBackground.getRGB(x, y)>>24 == 0x00) { //if pixel is transparent
+                    leftEdges[y] = x+lossOfDetail;
                     break;
-                } else {
-                    writer.append('O');
                 }
             }
-            writer.append('\n');
+            //right half
+            for (int x = 256; x < 512; x+=lossOfDetail) {
+                if (teaBackground.getRGB(x, y)>>24 == 0x00) { //if pixel is transparent
+                    rightEdges[y] = x-lossOfDetail;
+                    break;
+                }
+            }
         }
-        writer.close();
+        //binary type beat search - slower than spread search when lossOfDetail >= 4. however, it is gives the exact edges
+        // int[] leftEdges2 = new int[512];
+        // int[] rightEdges2 = new int[512];
+        // for (int y = 0; y < 512; y++) {
+        //     //left half
+        //     boolean leftEdgeFound = false;
+        //     boolean rightEdgeFound = false;
+        //     int leftBound = 0;
+        //     int rightBound = 256;
+        //     while (!leftEdgeFound) {
+        //         if (rightBound-leftBound <= 1) {
+        //             leftEdgeFound = true;
+        //         }
+        //         int xCheck = ((rightBound-leftBound)/2) + leftBound;
+        //         if (teaBackground.getRGB(xCheck, y)>>24 == 0x00) { //if pixel in middle of rB-lB is transparent
+        //             leftBound = xCheck;
+        //         } else {
+        //             rightBound = xCheck;
+        //         }
+        //     }
+        //     leftEdges2[y] = rightBound;
+        //     leftBound = 256;
+        //     rightBound = 512;
+        //     while (!rightEdgeFound) {
+        //         if (rightBound-leftBound <= 1) {
+        //             rightEdgeFound = true;
+        //         }
+        //         int xCheck = ((rightBound-leftBound)/2) + leftBound;
+        //         if (teaBackground.getRGB(xCheck, y)>>24 == 0x00) { //if pixel in middle of rB-lB is transparent
+        //             rightBound = xCheck;
+        //         } else {
+        //             leftBound = xCheck;
+        //         }
+        //     }
+        //     rightEdges2[y] = leftBound;
+        // }
         return populatedToppingsImage.getEditedImage();
     }
 
