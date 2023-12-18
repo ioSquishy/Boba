@@ -120,6 +120,7 @@ public class BobaGod {
      * @return
      * [0][x]: returns leftEdge
      * [1][x]: return rightEdge
+     * [2][0]: lowest opaque point
      */
     private static Short[][] getOpaqueEdges(BufferedImage img) {
         Short[] leftEdges = new Short[512];
@@ -142,7 +143,8 @@ public class BobaGod {
         //         }
         //     }
         // }
-        for (short y = 0; y < 512; y++) {
+        boolean traversingOpaquePixels = false;
+        for (short y = 512-1; y >= 0; y--) {
             //left half
             boolean leftEdgeFound = false;
             boolean rightEdgeFound = false;
@@ -160,6 +162,7 @@ public class BobaGod {
                 }
             }
             leftEdges[y] = rightBound;
+            //right half
             leftBound = 256;
             rightBound = 512;
             while (!rightEdgeFound) {
@@ -174,6 +177,16 @@ public class BobaGod {
                 }
             }
             rightEdges[y] = leftBound;
+            //checking if lowest opaque pixel has been reached
+            if (traversingOpaquePixels) {
+                boolean leftTraversed = leftEdges[y] == 256;
+                boolean rightTraversed = rightEdges[y] == 256;
+                if (leftTraversed && rightTraversed) {
+                    break;
+                }
+            } else if (leftEdges[y] != 256 && rightEdges[y] != 256) {
+                traversingOpaquePixels = true;
+            }
         }
         return new Short[][] {leftEdges, rightEdges};
     }
