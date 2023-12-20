@@ -1,12 +1,7 @@
 package iosquishy.ImageGen;
 
 import java.awt.Image;
-import java.awt.Panel;
 import java.awt.image.BufferedImage;
-import java.awt.image.TileObserver;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.time.Instant;
 import java.awt.Color;
 import java.awt.Point;
@@ -14,13 +9,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 
 import org.javacord.api.entity.message.component.SelectMenuOption;
@@ -144,6 +137,8 @@ public class BobaGod {
         //     }
         // }
         boolean traversingOpaquePixels = false;
+        short firstOpaquePixel = 0;
+        short lastOpaquePixel = 0;
         for (short y = 512-1; y >= 0; y--) {
             //left half
             boolean leftEdgeFound = false;
@@ -177,18 +172,22 @@ public class BobaGod {
                 }
             }
             rightEdges[y] = leftBound;
-            //checking if lowest opaque pixel has been reached
+            //checking if transparent pixels have been reached
             if (traversingOpaquePixels) {
                 boolean leftTraversed = leftEdges[y] == 256;
                 boolean rightTraversed = rightEdges[y] == 256;
-                if (leftTraversed && rightTraversed) {
+                if (leftTraversed || rightTraversed) {
+                    firstOpaquePixel = ++y;
                     break;
                 }
             } else if (leftEdges[y] != 256 && rightEdges[y] != 256) {
                 traversingOpaquePixels = true;
+                lastOpaquePixel = ++y;
             }
         }
-        return new Short[][] {leftEdges, rightEdges};
+        Short[] opaqueLeftEdges = Arrays.copyOfRange(leftEdges, firstOpaquePixel, lastOpaquePixel);
+        Short[] opaqueRightEdges = Arrays.copyOfRange(rightEdges, firstOpaquePixel, lastOpaquePixel);
+        return new Short[][] {opaqueLeftEdges, opaqueRightEdges};
     }
     //Local Stuff
     private long lastCmdUseSec = Instant.now().getEpochSecond();
@@ -231,9 +230,12 @@ public class BobaGod {
         Short[] rightEdges = teaImageEdges.get(cupStyle)[1];
         // generate template of spots to place boba sprites
         int bobaSlotsToGen = 30 + random.nextInt(6); //generates 30-35 bobaSlots
+        int validUpperBound = Math.round(leftEdges.length/0.66F);
+        int validLowerBound = leftEdges.length-1;
         Point[] slots = new Point[bobaSlotsToGen];
         for (int slot = 0; slot < bobaSlotsToGen; slot++) {
-
+            //pick a random y-val with higher chance of being higher number (lower on image)
+            
         }
         return populatedToppingsImage.getEditedImage();
     }
