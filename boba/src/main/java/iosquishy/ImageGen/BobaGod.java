@@ -247,7 +247,7 @@ public class BobaGod {
         int upperThirdMax = middleThirdMax-denominator;
         System.out.println("upp: " + upperThirdMin + "  - " + upperThirdMax);
         // generate template of spots to place boba sprites
-        byte bobaSlotsToGen = (byte) (30 + random.nextInt(6)); //generates 30-35 bobaSlots
+        byte bobaSlotsToGen = (byte) (20 + random.nextInt(6)); //generates 20-25 bobaSlots
         ArrayList<Point> slots = new ArrayList<Point>(bobaSlotsToGen);
         for (byte slot = 0; slot < bobaSlotsToGen; slot++) {
             //pick a random y-val with higher chance of being higher number (lower on image)
@@ -268,7 +268,6 @@ public class BobaGod {
             //pick a random point in the range of the selected third 
             int potentialY = random.nextInt(upperBound, lowerBound);
             int potentialX = random.nextInt(leftEdges[potentialY], rightEdges[potentialY]);
-            //check if point is at least 16 pixels away from other slots
             //add point to template
             slots.add(new Point(potentialX, potentialY));
         }
@@ -276,7 +275,8 @@ public class BobaGod {
         int slotsPerTopping = bobaSlotsToGen/toppings.size();
         for (Topping topping : toppings) {
             for (byte i = 0; i < slotsPerTopping; i++) {
-                
+                Point slot = slots.remove(0);
+                populatedToppingsImage.setLayer(topping.toString() + i, newToppings.get(topping), (int) slot.getX(), (int) slot.getY());
             }
         }
         return populatedToppingsImage.getEditedImage();
