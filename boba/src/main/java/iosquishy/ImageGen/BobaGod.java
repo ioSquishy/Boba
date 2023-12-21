@@ -139,6 +139,7 @@ public class BobaGod {
         boolean traversingOpaquePixels = false;
         short firstOpaquePixel = 0;
         short lastOpaquePixel = 0;
+        byte distanceFromEdge = 16; // boba sprite is 32 pixels wide. so, the center should be at least 16 (half) pixels away from edge
         for (short y = 512-1; y >= 0; y--) {
             //left half
             boolean leftEdgeFound = false;
@@ -156,7 +157,7 @@ public class BobaGod {
                     rightBound = xCheck;
                 }
             }
-            leftEdges[y] = rightBound;
+            leftEdges[y] = rightBound-=distanceFromEdge;
             //right half
             leftBound = 256;
             rightBound = 512;
@@ -171,7 +172,7 @@ public class BobaGod {
                     leftBound = xCheck;
                 }
             }
-            rightEdges[y] = leftBound;
+            rightEdges[y] = leftBound+=distanceFromEdge;
             //checking if transparent pixels have been reached
             if (traversingOpaquePixels) {
                 boolean leftTraversed = leftEdges[y] == 256;
@@ -228,14 +229,55 @@ public class BobaGod {
         //get edges of teaBackground
         Short[] leftEdges = teaImageEdges.get(cupStyle)[0];
         Short[] rightEdges = teaImageEdges.get(cupStyle)[1];
-        // generate template of spots to place boba sprites
-        int bobaSlotsToGen = 30 + random.nextInt(6); //generates 30-35 bobaSlots
-        int validUpperBound = Math.round(leftEdges.length/0.66F);
+        //create bounds for where toppings can spawn (only able to spawn in bottom third of tea)
         int validLowerBound = leftEdges.length-1;
-        Point[] slots = new Point[bobaSlotsToGen];
-        for (int slot = 0; slot < bobaSlotsToGen; slot++) {
+        int validUpperBound = validLowerBound-(validLowerBound/3);
+        System.out.println("vlb: " + validLowerBound);
+        System.out.println("vub: " + validUpperBound);
+        //split validBound into thirds
+        int denominator = (validLowerBound-validUpperBound)/3; //denominator is used to find the ranges of the third that the validBounds will be split into
+        System.out.println("den: " + denominator);
+        int lowerThirdMin = validLowerBound;
+        int lowerThirdMax = lowerThirdMin-denominator;
+        System.out.println("low: " + lowerThirdMin + " - " + lowerThirdMax);
+        int middleThirdMin = lowerThirdMax;
+        int middleThirdMax = lowerThirdMax-denominator;
+        System.out.println("mid: " + middleThirdMin + " - " + middleThirdMax);
+        int upperThirdMin = middleThirdMax;
+        int upperThirdMax = middleThirdMax-denominator;
+        System.out.println("upp: " + upperThirdMin + "  - " + upperThirdMax);
+        // generate template of spots to place boba sprites
+        byte bobaSlotsToGen = (byte) (30 + random.nextInt(6)); //generates 30-35 bobaSlots
+        ArrayList<Point> slots = new ArrayList<Point>(bobaSlotsToGen);
+        for (byte slot = 0; slot < bobaSlotsToGen; slot++) {
             //pick a random y-val with higher chance of being higher number (lower on image)
-            
+            // choose a random bound with more weight to the bottom third
+            byte r = (byte) random.nextInt(101);
+            int upperBound;
+            int lowerBound;
+            if (r >= 80) { //upper third has 20% chance of spawning
+                upperBound = upperThirdMax;
+                lowerBound = upperThirdMin;
+            } else if (r >= 70) { //middle third has 30% chance of spawning
+                upperBound = middleThirdMax;
+                lowerBound = middleThirdMin;
+            } else { //bottom third has 50% chance of spawning
+                upperBound = lowerThirdMax;
+                lowerBound = lowerThirdMin;
+            }
+            //pick a random point in the range of the selected third 
+            int potentialY = random.nextInt(upperBound, lowerBound);
+            int potentialX = random.nextInt(leftEdges[potentialY], rightEdges[potentialY]);
+            //check if point is at least 16 pixels away from other slots
+            //add point to template
+            slots.add(new Point(potentialX, potentialY));
+        }
+        //populate template with random toppings
+        int slotsPerTopping = bobaSlotsToGen/toppings.size();
+        for (Topping topping : toppings) {
+            for (byte i = 0; i < slotsPerTopping; i++) {
+                
+            }
         }
         return populatedToppingsImage.getEditedImage();
     }
