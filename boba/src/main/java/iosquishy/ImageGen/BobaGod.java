@@ -35,7 +35,7 @@ public class BobaGod {
     }
     private static HashMap<CupStyle, Image> cupImage = new HashMap<>(CupStyle.values().length);
     private static HashMap<CupStyle, Image> teaImage = new HashMap<>(CupStyle.values().length);
-    private static HashMap<CupStyle, Short[][]> teaImageEdges = new HashMap<>(CupStyle.values().length);
+    private static HashMap<CupStyle, Point[][]> teaImageEdges = new HashMap<>(CupStyle.values().length);
     private static HashMap<Tea, Color> teaColor = new HashMap<>(Tea.values().length);
 	private static HashMap<CupStyle, HashMap<Topping, Image>> toppingStyle = new HashMap<>(CupStyle.values().length);
     private static HashMap<Topping, Image> newToppings = new HashMap<>(CupStyle.values().length);
@@ -115,31 +115,12 @@ public class BobaGod {
      * [1][x]: return rightEdge
      * [2][0]: lowest opaque point
      */
-    private static Short[][] getOpaqueEdges(BufferedImage img) {
-        Short[] leftEdges = new Short[512];
-        Short[] rightEdges = new Short[512];
-        // // gets the left/right borders between transparent and opaque pixels
-        // int lossOfDetail = 8; //skips said amount of pixels to save time, must be >= 4 to be useful, otherwise should use binary type beat search | note: must be divisble by 512
-        // for (short y = 0; y < 512; y++) {
-        //     //left half
-        //     for (short x = 256; x >= 0; x-=lossOfDetail) {
-        //         if (img.getRGB(x, y)>>24 == 0x00) { //if pixel is transparent
-        //             leftEdges[y] = x;
-        //             break;
-        //         }
-        //     }
-        //     //right half
-        //     for (short x = 256; x < 512; x+=lossOfDetail) {
-        //         if (img.getRGB(x, y)>>24 == 0x00) { //if pixel is transparent
-        //             rightEdges[y] = x;
-        //             break;
-        //         }
-        //     }
-        // }
+    private static Point[][] getOpaqueEdges(BufferedImage img) {
+        Point[] leftEdges = new Point[512];
+        Point[] rightEdges = new Point[512];
         boolean traversingOpaquePixels = false;
         short firstOpaquePixel = 0;
         short lastOpaquePixel = 0;
-        byte distanceFromEdge = 16; // boba sprite is 32 pixels wide. so, the center should be at least 16 (half) pixels away from edge
         for (short y = 512-1; y >= 0; y--) {
             //left half
             boolean leftEdgeFound = false;
@@ -157,7 +138,7 @@ public class BobaGod {
                     rightBound = xCheck;
                 }
             }
-            leftEdges[y] = rightBound-=distanceFromEdge;
+            leftEdges[y] = new Point(rightBound, y);
             //right half
             leftBound = 256;
             rightBound = 512;
@@ -172,23 +153,23 @@ public class BobaGod {
                     leftBound = xCheck;
                 }
             }
-            rightEdges[y] = leftBound+=distanceFromEdge;
+            rightEdges[y] = new Point(leftBound, y);
             //checking if transparent pixels have been reached
             if (traversingOpaquePixels) {
-                boolean leftTraversed = leftEdges[y] == 256;
-                boolean rightTraversed = rightEdges[y] == 256;
+                boolean leftTraversed = leftEdges[y].getX() == 256;
+                boolean rightTraversed = rightEdges[y].getX() == 256;
                 if (leftTraversed || rightTraversed) {
                     firstOpaquePixel = ++y;
                     break;
                 }
-            } else if (leftEdges[y] != 256 && rightEdges[y] != 256) {
+            } else if (leftEdges[y].getX() != 256 && rightEdges[y].getX() != 256) {
                 traversingOpaquePixels = true;
                 lastOpaquePixel = ++y;
             }
         }
-        Short[] opaqueLeftEdges = Arrays.copyOfRange(leftEdges, firstOpaquePixel, lastOpaquePixel);
-        Short[] opaqueRightEdges = Arrays.copyOfRange(rightEdges, firstOpaquePixel, lastOpaquePixel);
-        return new Short[][] {opaqueLeftEdges, opaqueRightEdges};
+        Point[] opaqueLeftEdges = Arrays.copyOfRange(leftEdges, firstOpaquePixel, lastOpaquePixel);
+        Point[] opaqueRightEdges = Arrays.copyOfRange(rightEdges, firstOpaquePixel, lastOpaquePixel);
+        return new Point[][] {opaqueLeftEdges, opaqueRightEdges};
     }
     //Local Stuff
     private long lastCmdUseSec = Instant.now().getEpochSecond();
@@ -224,62 +205,41 @@ public class BobaGod {
         }
     }
     private static Random random = new Random();
+    private static byte halfToppingSize = 10; // boba sprite is 20 pixels wide. so, the center should be at least 10 (half) pixels away from edge
+    private static byte bottomAccuracy = 3; //skips set amount of pixels on y-axis to find the lowest point a boba can be placed on opaque pixels at an x value
     private static BufferedImage populateToppings(ArrayList<Topping> toppings, CupStyle cupStyle) {  //populate toppings progamatically
         ImgEditor populatedToppingsImage = new ImgEditor(512, 512);
         //get edges of teaBackground
-        Short[] leftEdges = teaImageEdges.get(cupStyle)[0];
-        Short[] rightEdges = teaImageEdges.get(cupStyle)[1];
+        Point[] leftEdges = teaImageEdges.get(cupStyle)[0];
+        Point[] rightEdges = teaImageEdges.get(cupStyle)[1];
         //create bounds for where toppings can spawn (only able to spawn in bottom third of tea)
-        int validLowerBound = leftEdges.length-1;
+        int validLowerBound = leftEdges.length-1-5; //extra -5 because i want it to be further from the bottom
         int validUpperBound = validLowerBound-(validLowerBound/3);
-        System.out.println("vlb: " + validLowerBound);
-        System.out.println("vub: " + validUpperBound);
-        //split validBound into thirds
-        int denominator = (validLowerBound-validUpperBound)/3; //denominator is used to find the ranges of the third that the validBounds will be split into
-        System.out.println("den: " + denominator);
-        int lowerThirdMin = validLowerBound;
-        int lowerThirdMax = lowerThirdMin-denominator;
-        System.out.println("low: " + lowerThirdMin + " - " + lowerThirdMax);
-        int middleThirdMin = lowerThirdMax;
-        int middleThirdMax = lowerThirdMax-denominator;
-        System.out.println("mid: " + middleThirdMin + " - " + middleThirdMax);
-        int upperThirdMin = middleThirdMax;
-        int upperThirdMax = middleThirdMax-denominator;
-        System.out.println("upp: " + upperThirdMin + "  - " + upperThirdMax);
-        // generate template of spots to place boba sprites
-        byte bobaSlotsToGen = (byte) (20 + random.nextInt(6)); //generates 20-25 bobaSlots
-        ArrayList<Point> slots = new ArrayList<Point>(bobaSlotsToGen);
-        for (byte slot = 0; slot < bobaSlotsToGen; slot++) {
-            //pick a random y-val with higher chance of being higher number (lower on image)
-            // choose a random bound with more weight to the bottom third
-            byte r = (byte) random.nextInt(101);
-            int upperBound;
-            int lowerBound;
-            if (r >= 80) { //upper third has 20% chance of spawning
-                upperBound = upperThirdMax;
-                lowerBound = upperThirdMin;
-            } else if (r >= 70) { //middle third has 30% chance of spawning
-                upperBound = middleThirdMax;
-                lowerBound = middleThirdMin;
-            } else { //bottom third has 50% chance of spawning
-                upperBound = lowerThirdMax;
-                lowerBound = lowerThirdMin;
+        //start in the middle (+/- 10) and iterate every 20 pixels create a point 12 pixels from the lowest point
+        // left
+        System.out.println("x >= " + leftEdges[validLowerBound-halfToppingSize].getX());
+        for (int x = 256-halfToppingSize; x >= leftEdges[validLowerBound-halfToppingSize].getX(); x-=(halfToppingSize*2)) {
+            int y = validLowerBound-halfToppingSize;
+            while (!isInBounds(x, leftEdges[y+halfToppingSize].getX(), rightEdges[y+halfToppingSize].getX())) { //checks if the point 10 pixels lower is within the bounds, if not moves y up until it is
+                y-=bottomAccuracy;
             }
-            //pick a random point in the range of the selected third 
-            int potentialY = random.nextInt(upperBound, lowerBound);
-            int potentialX = random.nextInt(leftEdges[potentialY], rightEdges[potentialY]);
-            //add point to template
-            slots.add(new Point(potentialX, potentialY));
-        }
-        //populate template with random toppings
-        int slotsPerTopping = bobaSlotsToGen/toppings.size();
-        for (Topping topping : toppings) {
-            for (byte i = 0; i < slotsPerTopping; i++) {
-                Point slot = slots.remove(0);
-                populatedToppingsImage.setLayer(topping.toString() + i, newToppings.get(topping), (int) slot.getX(), (int) slot.getY());
-            }
+            populatedToppingsImage.setLayer("test"+x, newToppings.get(toppings.get(0)), x-halfToppingSize, leftEdges[y].getY()-15);
         }
         return populatedToppingsImage.getEditedImage();
+    }
+    /**
+     * inclusive of bounds
+     * @param numToCheck
+     * @param leftBound
+     * @param rightBound
+     * @return
+     */
+    private static boolean isInBounds(int numToCheck, double leftBound, double rightBound) {
+        if (numToCheck >= leftBound && numToCheck <= rightBound) {
+            return true;
+        } else {
+            return false;
+        }
     }
 
     //Return methods

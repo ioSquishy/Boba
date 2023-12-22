@@ -53,6 +53,19 @@ public class ImgEditor {
     }
 
     /**
+     * Sets specified layer to the image provided and offsets it from the top-left corner by the specified x and y values.
+     * 
+     * @param layerName Layer to change.
+     * @param newImage Image to set layer to.
+     * @param x X-coordinate from top-left corner to place image.
+     * @param y Y-coordinate from top-left corner to place image.
+     */
+    public void setLayer(String layerName, Image newImage, double x, double y) {
+        this.layers.put(layerName, newImage);
+        this.transforms.put(layerName, new Point((int)x, (int)y));
+    }
+
+    /**
      * Removes specified layer form the final image.
      * 
      * @param layerName Name of layer to remove.
