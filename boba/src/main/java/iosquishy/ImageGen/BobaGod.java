@@ -171,6 +171,109 @@ public class BobaGod {
         Point[] opaqueRightEdges = Arrays.copyOfRange(rightEdges, firstOpaquePixel, lastOpaquePixel);
         return new Point[][] {opaqueLeftEdges, opaqueRightEdges};
     }
+    private static Random random = new Random();
+    private static byte halfToppingSize = 10; // boba sprite is 20 pixels wide. so, the center should be at least 10 (half) pixels away from edge
+    private static byte bottomAccuracy = 2; //skips set amount of pixels on y-axis to find the lowest point a boba can be placed on opaque pixels at an x value
+    private static byte borderTolerance = 5; //minimum amount of pixels away from transparent pixels
+    private static byte distanceBetweenToppings = 24;
+    private static byte distanceBetweenLayers = 5;
+    private static BufferedImage populateToppings(ArrayList<Topping> toppings, CupStyle cupStyle) {  //populate toppings progamatically
+        ImgEditor populatedToppingsImage = new ImgEditor(512, 512);
+        //get edges of teaBackground
+        Point[] leftEdges = teaImageEdges.get(cupStyle)[0];
+        Point[] rightEdges = teaImageEdges.get(cupStyle)[1];
+        //create bounds for where toppings can spawn (only able to spawn in bottom third of tea)
+        int validLowerBound = leftEdges.length-1-5; //extra -5 because i want it to be further from the bottom
+        //start in the middle (+/- 10) and iterate every distanceBetweenToppings pixels
+        // left
+        // for (int x = 256-halfToppingSize-random.nextInt(2); x > leftEdges[validLowerBound-halfToppingSize].getX(); x-=distanceBetweenToppings) {
+        //     int y = validLowerBound-halfToppingSize-random.nextInt(2);
+        //     while (!isInBounds(x, leftEdges[y].getX()+halfToppingSize+borderTolerance, 256)) {
+        //         y-=bottomAccuracy;
+        //         x++;
+        //     }
+        //     int randomXvariation = random.nextInt(-1, 1);
+        //     int randomYvariation = random.nextInt(-3, 1);
+        //     populatedToppingsImage.setLayer("test"+x, newToppings.get(toppings.get(0)), x-halfToppingSize+randomXvariation, leftEdges[y].getY()-halfToppingSize+randomYvariation);
+        // }
+        // // right
+        // for (int x = 256+halfToppingSize+random.nextInt(2); x < rightEdges[validLowerBound-halfToppingSize].getX(); x+=distanceBetweenToppings) {
+        //     int y = validLowerBound-halfToppingSize-random.nextInt(2);
+        //     while (!isInBounds(x, 256, rightEdges[y].getX()-halfToppingSize-borderTolerance)) { //checks if the point 10 pixels lower is within the bounds, if not moves y up until it is
+        //         y-=bottomAccuracy;
+        //         x--;
+        //     }
+        //     int randomXvariation = random.nextInt(-1, 1);
+        //     int randomYvariation = random.nextInt(-3, 1);
+        //     populatedToppingsImage.setLayer("test"+x, newToppings.get(toppings.get(0)), x-halfToppingSize+randomXvariation, leftEdges[y].getY()-halfToppingSize+randomYvariation);
+        // }
+        ArrayList<Integer> prevYvalues = new ArrayList<Integer>(); //right to left
+        for (byte layer = 0; layer < 2; layer++) {
+            int xOffset = halfToppingSize - (layer%2)*halfToppingSize;
+            int layerYoffset = layer*(halfToppingSize*2);
+            byte xIterations = 0;
+            // left
+            System.out.println(prevYvalues);
+            for (int x = 256-xOffset; x > leftEdges[validLowerBound-halfToppingSize].getX(); x-=distanceBetweenToppings) {
+                int y;
+                if (layer == 0) {
+                     y = validLowerBound-halfToppingSize-layerYoffset;
+                } else {
+                    y = prevYvalues.get(xIterations)-distanceBetweenLayers-20;
+                }
+                while (!isInBounds(x, leftEdges[y].getX()+halfToppingSize+borderTolerance, 256)) {
+                    y-=bottomAccuracy;
+                    x++;
+                }
+                int randomXvariation = random.nextInt(-1, 1);
+                int randomYvariation = random.nextInt(-2, 1);
+                populatedToppingsImage.setLayer("test"+x, newToppings.get(toppings.get(0)), x-halfToppingSize+randomXvariation, leftEdges[y].getY()-halfToppingSize+randomYvariation);
+                if (layer == 0) {
+                    prevYvalues.add(y);
+                } else {
+                    prevYvalues.set(xIterations, y);
+                }
+                xIterations++;
+            }
+            // right
+            for (int x = 256+xOffset; x < rightEdges[validLowerBound-halfToppingSize].getX(); x+=distanceBetweenToppings) {
+                int y;
+                if (layer == 0) {
+                     y = validLowerBound-halfToppingSize-layerYoffset;
+                } else {
+                    y = prevYvalues.get(xIterations)-distanceBetweenLayers;
+                }
+                while (!isInBounds(x, 256, rightEdges[y].getX()-halfToppingSize-borderTolerance)) { //checks if the point 10 pixels lower is within the bounds, if not moves y up until it is
+                    y-=bottomAccuracy;
+                    x--;
+                }
+                int randomXvariation = random.nextInt(-1, 1);
+                int randomYvariation = random.nextInt(-3, 1);
+                populatedToppingsImage.setLayer("test"+x, newToppings.get(toppings.get(0)), x-halfToppingSize+randomXvariation, leftEdges[y].getY()-halfToppingSize+randomYvariation);
+                if (layer == 0) {
+                    prevYvalues.add(y);
+                } else {
+                    prevYvalues.set(xIterations, y);
+                }
+                xIterations++;
+            }
+        }
+        return populatedToppingsImage.getEditedImage();
+    }
+    /**
+     * inclusive of bounds
+     * @param numToCheck
+     * @param leftBound
+     * @param rightBound
+     * @return
+     */
+    private static boolean isInBounds(int numToCheck, double leftBound, double rightBound) {
+        if (numToCheck >= leftBound && numToCheck <= rightBound) {
+            return true;
+        } else {
+            return false;
+        }
+    }
     //Local Stuff
     private long lastCmdUseSec = Instant.now().getEpochSecond();
 
@@ -204,58 +307,7 @@ public class BobaGod {
             toppings.remove(topping);
         }
     }
-    private static Random random = new Random();
-    private static byte halfToppingSize = 10; // boba sprite is 20 pixels wide. so, the center should be at least 10 (half) pixels away from edge
-    private static byte bottomAccuracy = 2; //skips set amount of pixels on y-axis to find the lowest point a boba can be placed on opaque pixels at an x value
-    private static byte borderTolerance = 5; //minimum amount of pixels away from transparent pixels
-    private static byte distanceBetweenToppings = 24;
-    private static BufferedImage populateToppings(ArrayList<Topping> toppings, CupStyle cupStyle) {  //populate toppings progamatically
-        ImgEditor populatedToppingsImage = new ImgEditor(512, 512);
-        //get edges of teaBackground
-        Point[] leftEdges = teaImageEdges.get(cupStyle)[0];
-        Point[] rightEdges = teaImageEdges.get(cupStyle)[1];
-        //create bounds for where toppings can spawn (only able to spawn in bottom third of tea)
-        int validLowerBound = leftEdges.length-1-5; //extra -5 because i want it to be further from the bottom
-        int validUpperBound = validLowerBound-(validLowerBound/3);
-        //start in the middle (+/- 10) and iterate every 20 pixels create a point 12 pixels from the lowest point
-        // left
-        for (int x = 256-halfToppingSize; x > leftEdges[validLowerBound-halfToppingSize].getX(); x-=distanceBetweenToppings) {
-            int y = validLowerBound-halfToppingSize;
-            while (!isInBounds(x, leftEdges[y].getX()+halfToppingSize+borderTolerance, 256)) {
-                y-=bottomAccuracy;
-                x++;
-            }
-            int randomXvariation = random.nextInt(-1, 1);
-            int randomYvariation = random.nextInt(-3, 1);
-            populatedToppingsImage.setLayer("test"+x, newToppings.get(toppings.get(0)), x-halfToppingSize+randomXvariation, leftEdges[y].getY()-halfToppingSize+randomYvariation);
-        }
-        // right
-        for (int x = 256+halfToppingSize; x < rightEdges[validLowerBound-halfToppingSize].getX(); x+=distanceBetweenToppings) {
-            int y = validLowerBound-halfToppingSize;
-            while (!isInBounds(x, 256, rightEdges[y].getX()-halfToppingSize-borderTolerance)) { //checks if the point 10 pixels lower is within the bounds, if not moves y up until it is
-                y-=bottomAccuracy;
-                x--;
-            }
-            int randomXvariation = random.nextInt(-1, 1);
-            int randomYvariation = random.nextInt(-3, 1);
-            populatedToppingsImage.setLayer("test"+x, newToppings.get(toppings.get(0)), x-halfToppingSize+randomXvariation, leftEdges[y].getY()-halfToppingSize+randomYvariation);
-        }
-        return populatedToppingsImage.getEditedImage();
-    }
-    /**
-     * inclusive of bounds
-     * @param numToCheck
-     * @param leftBound
-     * @param rightBound
-     * @return
-     */
-    private static boolean isInBounds(int numToCheck, double leftBound, double rightBound) {
-        if (numToCheck >= leftBound && numToCheck <= rightBound) {
-            return true;
-        } else {
-            return false;
-        }
-    }
+    
 
     //Return methods
     //drink -> toppings -> cup
